@@ -1,0 +1,53 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Profiles {
+  id        String   @id
+  email     String   @unique
+  image     String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  Games     Games[]
+  Turns     Turns[]
+}
+
+model Words {
+  id         String   @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
+  word       String   @unique
+  definitions Json?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  Games      Games[]
+}
+
+model Games {
+  id      String   @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
+  word    Words    @relation(fields: [word_id], references: [id])
+  word_id String
+  user    Profiles @relation(fields: [user_id], references: [id])
+  user_id String
+  success Boolean?
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  Turns     Turns[]
+}
+
+model Turns {
+  id   String @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
+  word String
+
+  user    Profiles @relation(fields: [user_id], references: [id])
+  user_id String
+  game    Games    @relation(fields: [game_id], references: [id])
+  game_id String
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+}
