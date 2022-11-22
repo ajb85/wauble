@@ -11,10 +11,11 @@ import supabaseToken from "~/cookie";
 import { supabase } from "~/db.server";
 import middleware from "~/middleware";
 import routeIfAuthed from "~/middleware/routeIfAuthed";
+import type { RequestMeta } from "~/types";
 
 import { validateEmail } from "~/utils";
 
-export const loader = (meta: LoaderArgs) =>
+export const loader = (meta: RequestMeta) =>
   middleware(meta, routeIfAuthed("/app"));
 
 export async function action({ request }: ActionArgs) {
@@ -43,7 +44,7 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const { user, session, error } = await supabase.auth.signIn({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -55,8 +56,9 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
+  const { session, user } = data;
   if (session && user) {
-    return redirect("/app", {
+    return redirect("/game", {
       headers: {
         "Set-Cookie": await supabaseToken.serialize(session.access_token, {
           expires: new Date(session.expires_at || ""),
@@ -81,7 +83,7 @@ export const meta: MetaFunction = () => ({ title: "Login" });
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const redirectTo = searchParams.get("redirectTo") ?? "";
   const actionData = useActionData<typeof action>();
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);

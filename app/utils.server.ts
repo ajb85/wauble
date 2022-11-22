@@ -1,3 +1,4 @@
+import type { Turns } from "@prisma/client";
 import supabaseToken from "./cookie";
 import { supabase } from "./db.server";
 import type { RequestMeta } from "./types";
@@ -9,8 +10,9 @@ export const getToken = async ({ request }: RequestMeta) => {
 };
 
 export const getUserByToken = async (token: string) => {
-  supabase.auth.setAuth(token);
-  const { user, error } = await supabase.auth.api.getUser(token);
+  const {
+    data: { user, error },
+  } = await supabase.auth.getUser(token);
   return { user, error };
 };
 
@@ -81,3 +83,52 @@ export const getFromLoader = (meta: RequestMeta, key?: string) => {
 
   return key ? meta.locals.loader[key] : meta.locals.loader;
 };
+
+export type PTurn = Array<{
+  letter: string;
+  isInWord: boolean;
+}>;
+
+export type ProcessedTurns = {
+  turns: Array<PTurn>;
+  correctPositions: Array<string | null>;
+  guesses: { [k: string]: "correct" | "inWord" | "wrong" };
+};
+export function processTurns(turns: Array<Turns>, w: string) {
+  const word = w.toLowerCase();
+  return turns.reduce(
+    (acc: ProcessedTurns, { word }) => {
+      acc.turns.push(
+        word
+          .toLowerCase()
+          .split("")
+          .map((letter, i) => {
+            const isCorrect = word[i] === letter;
+            if (isCorrect) {
+              acc.correctPositions[i] = letter;
+            }
+            const isInWord = isCorrect || word.includes(letter);
+            if (!acc.guesses[letter]) {
+              const letterGuess = isCorrect
+                ? "correct"
+                : isInWord
+                ? "inWord"
+                : "wrong";
+              acc.guesses[letter] = letterGuess;
+            }
+            return {
+              letter,
+              isInWord,
+            };
+          })
+      );
+
+      return acc;
+    },
+    {
+      correctPositions: new Array(word.length).fill(null),
+      turns: [],
+      guesses: {},
+    }
+  );
+}

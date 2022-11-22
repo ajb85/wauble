@@ -1,0 +1,17 @@
+.slantBG {
+  height: 100vh;
+  margin: 0;
+  background: yellow;
+}
+
+.slantBG:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  background: #000;
+  transform: skew(-30deg);
+  transform-origin: top;
+}

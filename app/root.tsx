@@ -12,7 +12,13 @@ import {
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
+  return [
+    { rel: "stylesheet", href: tailwindStylesheetUrl },
+    {
+      rel: "stylesheet",
+      href: "https://fonts.googleapis.com/css2?family=Bungee+Outline&family=Roboto&display=swap",
+    },
+  ];
 };
 
 export const meta: MetaFunction = () => ({

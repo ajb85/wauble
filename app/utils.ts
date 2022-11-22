@@ -36,3 +36,21 @@ export function mergeObjects(obj1: any, obj2: any) {
 
   return obj2;
 }
+
+function combineTwoClasses(
+  class1: string,
+  class2?: string | false | undefined
+) {
+  if (!class2) {
+    return class1;
+  }
+
+  const space = class1.length ? " " : "";
+  return `${class1}${space}${class2 || ""}`;
+}
+
+export const combineClasses = (
+  ...classes: Array<string | false | undefined>
+) => {
+  return classes.reduce((acc: string, c) => combineTwoClasses(acc, c), "");
+};

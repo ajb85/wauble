@@ -1,5 +1,10 @@
 import { Link } from "@remix-run/react";
 
 export default function Index() {
-  return <main>Hello World</main>;
+  return (
+    <main>
+      <Link to="/login">Login</Link>
+      <Link to="/register">Register</Link>
+    </main>
+  );
 }

@@ -18,12 +18,12 @@ model Profiles {
 }
 
 model Words {
-  id         String   @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
-  word       String   @unique
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
+  word        String   @unique
   definitions Json?
-  createdAt  DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamptz(3)
-  Games      Games[]
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  Games       Games[]
 }
 
 model Games {
@@ -32,7 +32,7 @@ model Games {
   word_id String
   user    Profiles @relation(fields: [user_id], references: [id])
   user_id String
-  success Boolean?
+  score   Int
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
