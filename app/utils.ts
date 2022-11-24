@@ -54,3 +54,15 @@ export const combineClasses = (
 ) => {
   return classes.reduce((acc: string, c) => combineTwoClasses(acc, c), "");
 };
+
+export function getFromDataFromObject(
+  obj: AnyObject,
+  existingFormToAppend?: HTMLFormElement
+) {
+  const formData = new FormData(existingFormToAppend);
+  for (let key in obj) {
+    formData.set(key, JSON.stringify(obj[key]));
+  }
+
+  return formData;
+}

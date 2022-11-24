@@ -9,9 +9,8 @@ const keyRows = [
 
 type Props = {
   turns: ProcessedTurns;
-  currentTurn: string;
+  currentTurn: Array<string>;
   onSelect: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onSubmit: () => void;
   onDelete: () => void;
 };
 
@@ -24,12 +23,15 @@ const bgColorsByType = {
 
 export default function Keyboard(props: Props) {
   const { turns, currentTurn } = props;
+
   return (
     <div>
-      {keyRows.map((row) => (
-        <div className="flex justify-center">
+      {keyRows.map((row, i) => (
+        <div key={i} className="flex justify-center">
           {row.map((key) => (
             <button
+              type="button"
+              key={key}
               onClick={props.onSelect}
               className={combineClasses(
                 "mr-2 mb-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border-2 border-solid border-black font-extrabold shadow-md",
@@ -44,7 +46,7 @@ export default function Keyboard(props: Props) {
       <button
         disabled={turns.turns.length >= 5 || currentTurn.length < 5}
         className="mr-10"
-        onClick={props.onSubmit}
+        type="submit"
       >
         ✓
       </button>

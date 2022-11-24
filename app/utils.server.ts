@@ -11,7 +11,8 @@ export const getToken = async ({ request }: RequestMeta) => {
 
 export const getUserByToken = async (token: string) => {
   const {
-    data: { user, error },
+    data: { user },
+    error,
   } = await supabase.auth.getUser(token);
   return { user, error };
 };
@@ -89,32 +90,49 @@ export type PTurn = Array<{
   isInWord: boolean;
 }>;
 
+export type CorrectPositions = Array<string | null>;
+
 export type ProcessedTurns = {
   turns: Array<PTurn>;
-  correctPositions: Array<string | null>;
+  correctPositions: CorrectPositions;
   guesses: { [k: string]: "correct" | "inWord" | "wrong" };
 };
 export function processTurns(turns: Array<Turns>, w: string) {
   const word = w.toLowerCase();
+  const isLetterInWord = turns.map(() => getIsLetterInWord(word));
+  console.log("WORD IS", word);
+  const correctPositions: CorrectPositions = new Array(word.length)
+    .fill(null)
+    .map((position, i) => {
+      return (
+        turns.find((t, j) => {
+          // Loop first to remove correct letters from the count so the first instance of the
+          // letter isn't considered the correct one
+          const guess = t.word.toLowerCase();
+          const isMatch = guess[i] === word[i];
+          if (isMatch) isLetterInWord[j](guess[i]); // Reduce counter
+          return isMatch;
+        })?.word[i] || position
+      );
+    });
+
   return turns.reduce(
-    (acc: ProcessedTurns, { word }) => {
+    (acc: ProcessedTurns, turn, turnIndex) => {
       acc.turns.push(
-        word
+        turn.word
           .toLowerCase()
           .split("")
-          .map((letter, i) => {
-            const isCorrect = word[i] === letter;
-            if (isCorrect) {
-              acc.correctPositions[i] = letter;
-            }
-            const isInWord = isCorrect || word.includes(letter);
+          .map((letter, letterIndex) => {
+            const isCorrect =
+              acc.correctPositions[letterIndex]?.toLowerCase() ===
+              letter.toLowerCase();
+            const isInWord = isCorrect || isLetterInWord[turnIndex](letter);
             if (!acc.guesses[letter]) {
-              const letterGuess = isCorrect
+              acc.guesses[letter] = isCorrect
                 ? "correct"
                 : isInWord
                 ? "inWord"
                 : "wrong";
-              acc.guesses[letter] = letterGuess;
             }
             return {
               letter,
@@ -126,9 +144,32 @@ export function processTurns(turns: Array<Turns>, w: string) {
       return acc;
     },
     {
-      correctPositions: new Array(word.length).fill(null),
+      correctPositions,
       turns: [],
       guesses: {},
     }
   );
+}
+function getIsLetterInWord(word: string) {
+  const lookup = word
+    .toLowerCase()
+    .split("")
+    .reduce((acc: { [k: string]: number }, cur) => {
+      if (acc[cur]) {
+        acc[cur]++;
+      } else {
+        acc[cur] = 1;
+      }
+
+      return acc;
+    }, {});
+
+  return (letter: string) => {
+    if (!lookup[letter]) {
+      return false;
+    }
+
+    lookup[letter]--;
+    return true;
+  };
 }
