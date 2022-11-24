@@ -66,3 +66,17 @@ export function getFromDataFromObject(
 
   return formData;
 }
+
+export const bgColorsByType = {
+  correct: "bg-lime-300",
+  inWord: "bg-yellow-300",
+  wrong: "bg-zinc-500",
+  notGuessed: "shadow-slate-300",
+};
+
+export const bgHoverColorsByType = {
+  correct: "hover:bg-lime-100",
+  inWord: "hover:bg-yellow-100",
+  wrong: "hover:bg-zinc-300",
+  notGuessed: "hover:bg-slate-100",
+};

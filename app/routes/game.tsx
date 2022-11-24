@@ -48,7 +48,6 @@ export default function Game(props: {}) {
 
   const handleSubmit = useCallback(() => {
     setIsLoading(true);
-    console.log("SUBMITTING!");
     submit(formRef.current, {
       method: "post",
       action: "/game",

@@ -91,11 +91,12 @@ export type PTurn = Array<{
 }>;
 
 export type CorrectPositions = Array<string | null>;
+export type GuessesLookup = { [k: string]: "correct" | "inWord" | "wrong" };
 
 export type ProcessedTurns = {
   turns: Array<PTurn>;
   correctPositions: CorrectPositions;
-  guesses: { [k: string]: "correct" | "inWord" | "wrong" };
+  guesses: GuessesLookup;
 };
 export function processTurns(turns: Array<Turns>, w: string) {
   const word = w.toLowerCase();
