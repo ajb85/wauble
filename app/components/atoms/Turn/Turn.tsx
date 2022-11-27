@@ -20,7 +20,7 @@ export default function Turn(props: Props) {
         const isPTurn = "isInWord" in char;
         const { letter } = char;
         const isCorrect =
-          props.correctPositions[i]?.toLowerCase() === letter.toLowerCase();
+          props.correctPositions[i]?.toUpperCase() === letter.toUpperCase();
         const isInWord = isPTurn ? char.isInWord : false;
         return (
           <div

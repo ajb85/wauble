@@ -41,7 +41,7 @@ model Games {
 
 model Turns {
   id   String @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
-  word String
+  guess String
 
   user    Profiles @relation(fields: [user_id], references: [id])
   user_id String

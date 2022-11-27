@@ -4,6 +4,7 @@ import words from "../app/words.json";
 const prisma = new PrismaClient();
 
 async function seed() {
+  // await prisma.words.deleteMany({}); // Empty table
   await prisma.words.createMany({
     data: words.map((word) => ({ word, definitions: [] })),
   });

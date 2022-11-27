@@ -11,11 +11,11 @@ type Props = {
 
 export default function Guesses(props: Props) {
   return (
-    <div className="mb-4 min-h-[232px]">
+    <div className="mb-4">
       {(props.turns ?? []).map((t, i) => (
         <Turn key={i} data={t} correctPositions={props.correctPositions} />
       ))}
-      {props.turns.length < 5 && !props.gameIsOver && (
+      {!props.gameIsOver && (
         <Turn
           data={props.currentTurn}
           correctPositions={props.correctPositions}

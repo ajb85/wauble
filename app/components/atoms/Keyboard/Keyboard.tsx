@@ -11,6 +11,7 @@ type Props = {
   turns: ProcessedTurns;
   onSelect: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onDelete: () => void;
+  disabled?: boolean;
 };
 
 export default function Keyboard(props: Props) {
@@ -20,11 +21,11 @@ export default function Keyboard(props: Props) {
       {keyRows.map((row, i) => (
         <div key={i} className="flex justify-center">
           {row.map((key) => {
-            const status = turns.guesses[key.toLowerCase()];
+            const status = turns.guesses[key.toUpperCase()];
             return (
               <button
+                disabled={props.disabled}
                 type="button"
-                disabled={status === "wrong"}
                 key={key}
                 onClick={props.onSelect}
                 className={combineClasses(

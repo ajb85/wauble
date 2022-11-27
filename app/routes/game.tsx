@@ -1,11 +1,6 @@
-import {
-  Form,
-  useActionData,
-  useLoaderData,
-  useSubmit,
-} from "@remix-run/react";
+import { Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Keyboard, Guesses, Logo, Modal } from "~/components/atoms";
+import { Keyboard, Guesses, Logo } from "~/components/atoms";
 
 import { RequestMeta } from "~/types";
 import middleware, { isAuthed } from "~/middleware";
@@ -19,7 +14,7 @@ import {
   getGameStatus,
   processTurns,
 } from "~/utils.server";
-import type { GameTurn, ProcessedTurns } from "~/utils.server";
+import type { GameTurn } from "~/utils.server";
 import { combineClasses } from "~/utils";
 import { getTurnsForGame, saveTurn } from "~/models/turns.server";
 import GameOverModal from "~/components/atoms/GameOverModal/GameOverModal";
@@ -39,8 +34,8 @@ export const action = async (meta: RequestMeta) => {
     const turn: Array<GameTurn> = JSON.parse(
       formData.get("turn")?.toString() ?? ""
     );
-    const playAgain = formData.get("playAgain");
 
+    const playAgain = formData.get("playAgain");
     if (playAgain) {
       const currentGame = await getGameForUser(user.id);
       const turns = await getTurnsForGame(currentGame.id);
@@ -58,18 +53,17 @@ export const action = async (meta: RequestMeta) => {
 
         if (isOver) {
           const { Words, ...g } = currentGame;
-          const updated = await supabase
+          await supabase
             .from("Games")
             .update({ ...g, score: hasWon ? 1 : -1 })
             .eq("id", currentGame.id);
-          console.log("UPDATED: ", updated);
           return null;
         }
       }
     }
 
     const turnWord = turn.reduce((acc: string, cur) => acc + cur.letter, "");
-    if (Array.isArray(turn) && turn.length === 5 && !turnWord.includes("_")) {
+    if (Array.isArray(turn) && !turnWord.includes("_")) {
       await saveTurn(turn.map(({ letter }) => letter).join(""), user.id);
       return await getProcessedGameForUser(user.id);
     }
@@ -90,7 +84,7 @@ export default function Game(props: {}) {
     setIsLoading(false);
 
     setCurrentTurn((turn) =>
-      turn.map((t, i) => {
+      turn.map((_, i) => {
         const cPosition = processedTurns.correctPositions[i];
         return {
           letter: cPosition ?? "_",
@@ -149,9 +143,7 @@ export default function Game(props: {}) {
   }, []);
 
   const isSubmitDisabled =
-    isLoading ||
-    processedTurns.turns.length >= 5 ||
-    currentTurn.some(({ letter }) => letter === "_");
+    isLoading || currentTurn.some(({ letter }) => letter === "_") || isOver;
 
   const guessesGameBoard = (
     <Guesses
@@ -163,53 +155,58 @@ export default function Game(props: {}) {
     />
   );
   return (
-    <div className="ml-2 w-full">
+    <div className="ml-2 w-[98%]">
       <Form
         ref={formRef}
         method="post"
         onSubmit={handleSubmit}
-        className="mx-auto max-w-[400px]"
+        className="mx-auto flex h-screen max-w-[400px] flex-col justify-between"
       >
-        <GameOverModal isOver={isOver} hasWon={hasWon} word={word ?? ""}>
-          {guessesGameBoard}
-        </GameOverModal>
-        <Logo isLoading={isLoading} />
-        <input
-          style={{ display: "none" }}
-          name="turn"
-          value={JSON.stringify(currentTurn)}
-          readOnly
-        />
-        {guessesGameBoard}
-        <div className="mt-2">
-          <Keyboard
-            turns={processedTurns}
-            onSelect={handleKeyboardSelect}
-            onDelete={handleDelete}
+        <div>
+          <GameOverModal isOver={isOver} hasWon={hasWon} word={word ?? ""}>
+            {guessesGameBoard}
+          </GameOverModal>
+          <Logo isLoading={isLoading} />
+          <input
+            style={{ display: "none" }}
+            name="turn"
+            value={JSON.stringify(currentTurn)}
+            readOnly
           />
+          {guessesGameBoard}
         </div>
-        <div className={combineClasses("flex justify-center")}>
-          <button
-            disabled={isSubmitDisabled}
-            className={combineClasses(
-              "mr-10 h-10 w-1/2 rounded-md border-2 border-solid border-green-900",
-              isSubmitDisabled
-                ? "bg-green-700 text-slate-400"
-                : "bg-green-500 text-white"
-            )}
-            type="submit"
-          >
-            Submit Turn
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className={combineClasses(
-              "w-1/4 rounded-md bg-rose-800 text-white"
-            )}
-          >
-            {"<<"}
-          </button>
+        <div className="pb-4">
+          <div className="mt-2">
+            <Keyboard
+              turns={processedTurns}
+              onSelect={handleKeyboardSelect}
+              onDelete={handleDelete}
+              disabled={isOver || isLoading}
+            />
+          </div>
+          <div className={combineClasses("flex justify-center")}>
+            <button
+              disabled={isSubmitDisabled}
+              className={combineClasses(
+                "mr-10 h-10 w-1/2 rounded-md border-2 border-solid border-green-900",
+                isSubmitDisabled
+                  ? "bg-green-700 text-slate-400"
+                  : "bg-green-500 text-white"
+              )}
+              type="submit"
+            >
+              Submit Turn
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className={combineClasses(
+                "w-1/4 rounded-md bg-rose-800 text-white"
+              )}
+            >
+              {"<<"}
+            </button>
+          </div>
         </div>
       </Form>
     </div>

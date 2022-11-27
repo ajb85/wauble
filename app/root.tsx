@@ -41,10 +41,10 @@ export default function App() {
       <body className="h-full">
         <Outlet />
         <ScrollRestoration />
+        <script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></script>
         <Scripts />
         <LiveReload />
       </body>
-      <script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></script>
     </html>
   );
 }

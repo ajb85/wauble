@@ -103,9 +103,10 @@ export type ProcessedTurns = {
   turns: Array<PTurn>;
   correctPositions: CorrectPositions;
   guesses: GuessesLookup;
+  max: number;
 };
 export function processTurns(turns: Array<Turns>, w: string) {
-  const word = w.toLowerCase();
+  const word = w.toUpperCase();
   const isLetterInWord = turns.map(() => getIsLetterInWord(word));
 
   const correctPositions: CorrectPositions = new Array(word.length)
@@ -116,25 +117,25 @@ export function processTurns(turns: Array<Turns>, w: string) {
           .find((t, j) => {
             // Loop first to remove correct letters from the count so the first instance of the
             // letter isn't considered the correct one
-            const guess = t.word.toLowerCase();
+            const guess = t.guess.toUpperCase();
             const isMatch = guess[i] === word[i];
             if (isMatch) isLetterInWord[j](guess[i]); // Reduce counter
             return isMatch;
           })
-          ?.word[i].toLowerCase() || position
+          ?.guess[i].toUpperCase() || position
       );
     });
 
   return turns.reduce(
     (acc: ProcessedTurns, turn, turnIndex) => {
       acc.turns.push(
-        turn.word
-          .toLowerCase()
+        turn.guess
+          .toUpperCase()
           .split("")
           .map((letter, letterIndex) => {
             const isCorrect =
-              acc.correctPositions[letterIndex]?.toLowerCase() ===
-              letter.toLowerCase();
+              acc.correctPositions[letterIndex]?.toUpperCase() ===
+              letter.toUpperCase();
             const isInWord = !isCorrect && isLetterInWord[turnIndex](letter);
             acc.guesses[letter] = isCorrect
               ? "correct"
@@ -155,13 +156,14 @@ export function processTurns(turns: Array<Turns>, w: string) {
       correctPositions,
       turns: [],
       guesses: {},
+      max: getNumberOfRounds(),
     }
   );
 }
 
 function getIsLetterInWord(word: string) {
   const lookup = word
-    .toLowerCase()
+    .toUpperCase()
     .split("")
     .reduce((acc: { [k: string]: number }, cur) => {
       if (acc[cur]) {
@@ -183,8 +185,17 @@ function getIsLetterInWord(word: string) {
   };
 }
 
+export function getNumberOfRounds() {
+  return process.env.TURN_COUNT ? Number(process.env.TURN_COUNT) : 5;
+}
+
+export function userStillHasTurns(turns: Array<PTurn | Turns>) {
+  const rounds = getNumberOfRounds();
+  return turns.length < rounds;
+}
+
 export function getGameStatus(processedTurns: ProcessedTurns) {
   const hasWon = processedTurns.correctPositions.every((p) => p !== null);
-  const isOver = hasWon || processedTurns.turns.length >= 5;
+  const isOver = hasWon || !userStillHasTurns(processedTurns.turns);
   return { hasWon, isOver };
 }
