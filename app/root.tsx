@@ -1,5 +1,5 @@
 import type { LinksFunction, LoaderArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+
 import {
   Links,
   LiveReload,
@@ -23,7 +23,7 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "Remix Notes",
+  title: "Wauble",
   viewport: "width=device-width,initial-scale=1",
 });
 
@@ -44,6 +44,7 @@ export default function App() {
         <Scripts />
         <LiveReload />
       </body>
+      <script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></script>
     </html>
   );
 }

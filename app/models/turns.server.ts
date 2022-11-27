@@ -1,5 +1,6 @@
 import type { Turns } from "@prisma/client";
 import { supabase } from "~/db.server";
+import { getGameStatus, processTurns } from "~/utils.server";
 
 export async function getTurnsForGame(game_id: string): Promise<Array<Turns>> {
   const { data } = await supabase
@@ -11,10 +12,10 @@ export async function getTurnsForGame(game_id: string): Promise<Array<Turns>> {
   return data ?? [];
 }
 
-export async function saveTurn(word: string, user_id: string) {
+export async function saveTurn(guessWord: string, user_id: string) {
   const { data: currentGame } = await supabase
     .from("Games")
-    .select("id")
+    .select("id, word_id")
     .eq("score", 0)
     .eq("user_id", user_id)
     .limit(1)
@@ -23,8 +24,8 @@ export async function saveTurn(word: string, user_id: string) {
   if (currentGame !== null) {
     await supabase
       .from("Turns")
-      .insert({ word, user_id, game_id: currentGame.id });
+      .insert({ word: guessWord, user_id, game_id: currentGame.id });
   } else {
-    console.error(`No game found for ${word}`);
+    console.error(`No game found for ${guessWord}`);
   }
 }

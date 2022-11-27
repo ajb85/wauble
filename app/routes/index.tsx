@@ -4,7 +4,7 @@ export default function Index() {
   return (
     <main>
       <Link to="/login">Login</Link>
-      <Link to="/register">Register</Link>
+      <Link to="/join">Register</Link>
     </main>
   );
 }

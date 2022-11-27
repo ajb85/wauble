@@ -16,7 +16,7 @@ import type { RequestMeta } from "~/types";
 import { validateEmail } from "~/utils";
 
 export const loader = (meta: RequestMeta) =>
-  middleware(meta, routeIfAuthed("/app"));
+  middleware(meta, routeIfAuthed("/game"));
 
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();

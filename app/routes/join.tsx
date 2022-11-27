@@ -12,9 +12,10 @@ import routeIfAuthed from "~/middleware/routeIfAuthed";
 import { validateEmail } from "~/utils";
 import * as Users from "~/models/users.server";
 import { supabase } from "~/db.server";
+import type { RequestMeta } from "~/types";
 
-export const loader = (meta: LoaderArgs) =>
-  middleware(meta, routeIfAuthed("/app"));
+export const loader = (meta: RequestMeta) =>
+  middleware(meta, routeIfAuthed("/game"));
 
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
@@ -55,14 +56,13 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const { user, error } = await supabase.auth.signUp({
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.signUp({
     email,
     password,
   });
-
-  if (error) {
-    return json({ errors: error }, { status: 400 });
-  }
 
   if (user) {
     const profile = { id: user.id, email };
@@ -71,8 +71,16 @@ export async function action({ request }: ActionArgs) {
       return redirect("/verify-email");
     }
   }
+
+  if (error) {
+    return json(
+      { errors: { email: "Invalid email address", password: null } },
+      { status: 400 }
+    );
+  }
+
   return json(
-    { errors: { submit: "Unable to create your account" } },
+    { errors: { email: "Unable to create your account", password: null } },
     { status: 500 }
   );
 }
@@ -86,13 +94,16 @@ export default function Join() {
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
 
+  const emailError = "email" in (actionData?.errors ?? {});
+  const passwordError = "password" in (actionData?.errors ?? {});
+
   React.useEffect(() => {
-    if (actionData?.errors?.email) {
+    if (emailError) {
       emailRef.current?.focus();
-    } else if (actionData?.errors?.password) {
+    } else if (passwordError) {
       passwordRef.current?.focus();
     }
-  }, [actionData]);
+  }, [emailError, passwordError]);
 
   return (
     <div className="flex min-h-full flex-col justify-center">
@@ -114,13 +125,13 @@ export default function Join() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                aria-invalid={actionData?.errors?.email ? true : undefined}
+                aria-invalid={emailError ? true : undefined}
                 aria-describedby="email-error"
                 className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
               />
-              {actionData?.errors?.email && (
+              {emailError && (
                 <div className="pt-1 text-red-700" id="email-error">
-                  {actionData.errors.email}
+                  {emailError && actionData?.errors?.email}
                 </div>
               )}
             </div>
@@ -140,13 +151,13 @@ export default function Join() {
                 name="password"
                 type="password"
                 autoComplete="new-password"
-                aria-invalid={actionData?.errors?.password ? true : undefined}
+                aria-invalid={passwordError ?? undefined}
                 aria-describedby="password-error"
                 className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
               />
-              {actionData?.errors?.password && (
+              {passwordError && (
                 <div className="pt-1 text-red-700" id="password-error">
-                  {actionData.errors.password}
+                  {passwordError && actionData?.errors?.password}
                 </div>
               )}
             </div>

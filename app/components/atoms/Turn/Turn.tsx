@@ -1,20 +1,27 @@
 import { bgColorsByType, combineClasses } from "~/utils";
-import type { CorrectPositions, PTurn } from "~/utils.server";
+import type {
+  CorrectPositions,
+  GameTurn,
+  PTurn,
+  SinglePTurn,
+} from "~/utils.server";
+import LoadingIcon from "../LoadingIcon/LoadingIcon";
 
 type Props = {
-  data: PTurn | Array<string>;
+  data: PTurn | Array<GameTurn>;
   correctPositions: CorrectPositions;
+  isLoading?: boolean;
 };
 
 export default function Turn(props: Props) {
   return (
     <div className="my-2 flex justify-center">
       {(props.data ?? []).map((char, i) => {
-        const isString = typeof char === "string";
-        const letter = isString ? char : char.letter;
+        const isPTurn = "isInWord" in char;
+        const { letter } = char;
         const isCorrect =
           props.correctPositions[i]?.toLowerCase() === letter.toLowerCase();
-        const isInWord = isString ? false : char.isInWord;
+        const isInWord = isPTurn ? char.isInWord : false;
         return (
           <div
             key={i}
@@ -24,12 +31,12 @@ export default function Turn(props: Props) {
                 ? bgColorsByType.correct
                 : isInWord
                 ? bgColorsByType.inWord
-                : !isString
+                : isPTurn
                 ? bgColorsByType.wrong
                 : ""
             )}
           >
-            {letter.toUpperCase()}
+            {props.isLoading ? <LoadingIcon size="sm" /> : letter.toUpperCase()}
           </div>
         );
       })}

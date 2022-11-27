@@ -1,5 +1,5 @@
 import { bgColorsByType, bgHoverColorsByType, combineClasses } from "~/utils";
-import { ProcessedTurns } from "~/utils.server";
+import type { ProcessedTurns } from "~/utils.server";
 
 const keyRows = [
   ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -9,13 +9,12 @@ const keyRows = [
 
 type Props = {
   turns: ProcessedTurns;
-  currentTurn: Array<string>;
   onSelect: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onDelete: () => void;
 };
 
 export default function Keyboard(props: Props) {
-  const { turns, currentTurn } = props;
+  const { turns } = props;
   return (
     <div>
       {keyRows.map((row, i) => (
@@ -43,14 +42,6 @@ export default function Keyboard(props: Props) {
           })}
         </div>
       ))}
-      <button
-        disabled={turns.turns.length >= 5 || currentTurn.length < 5}
-        className="mr-10"
-        type="submit"
-      >
-        ✓
-      </button>
-      <button onClick={props.onDelete}>{"<<"}</button>
     </div>
   );
 }

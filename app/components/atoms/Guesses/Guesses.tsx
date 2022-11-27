@@ -1,26 +1,25 @@
-import type { CorrectPositions, PTurn } from "~/utils.server";
+import type { CorrectPositions, GameTurn, PTurn } from "~/utils.server";
 import { Turn } from "../";
 
 type Props = {
   correctPositions: CorrectPositions;
-  currentTurn: Array<string>;
+  currentTurn: Array<GameTurn>;
   turns: Array<PTurn>;
   gameIsOver: boolean;
+  isLoading: boolean;
 };
 
 export default function Guesses(props: Props) {
   return (
-    <div className="min-h-[232px]">
+    <div className="mb-4 min-h-[232px]">
       {(props.turns ?? []).map((t, i) => (
         <Turn key={i} data={t} correctPositions={props.correctPositions} />
       ))}
       {props.turns.length < 5 && !props.gameIsOver && (
         <Turn
-          data={[
-            ...props.currentTurn,
-            ...new Array(5 - props.currentTurn.length).fill("_"),
-          ]}
+          data={props.currentTurn}
           correctPositions={props.correctPositions}
+          isLoading={props.isLoading}
         />
       )}
     </div>
