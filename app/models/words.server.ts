@@ -17,7 +17,11 @@ export async function findNextWordForUser(user_id: string): Promise<Words> {
 }
 
 async function getWord(): Promise<Words> {
-  const { data } = supabase.from("random_words").select().limit(1).single();
+  const { data } = await supabase
+    .from("random_words")
+    .select()
+    .limit(1)
+    .single();
   return data;
 }
 
@@ -27,8 +31,8 @@ async function getFindNextWordForUser(user_id: string): Promise<Words | null> {
     .select()
     .eq("user_id", user_id);
 
-  const { data: nextWord } = await userGames.reduce(
-    (acc: typeof supabase, { word_id }: Games) => acc.neq("id", word_id),
+  const { data: nextWord } = await (userGames ?? []).reduce(
+    (acc, { word_id }: Games) => acc.neq("id", word_id),
     supabase.from("random_word").select().limit(1).single()
   );
 
@@ -66,4 +70,15 @@ async function addDefinitionToWord(wordRow: Words): Promise<Words | null> {
   }
 
   return wordRow;
+}
+
+export async function findWordByValue(word: string) {
+  const { data } = await supabase
+    .from("Words")
+    .select()
+    .eq("word", word)
+    .limit(1)
+    .single();
+
+  return data;
 }

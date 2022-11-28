@@ -1,4 +1,9 @@
-import { Form, useLoaderData, useSubmit } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useLoaderData,
+  useSubmit,
+} from "@remix-run/react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Keyboard, Guesses, Logo } from "~/components/atoms";
 
@@ -19,6 +24,8 @@ import { combineClasses } from "~/utils";
 import { getTurnsForGame, saveTurn } from "~/models/turns.server";
 import GameOverModal from "~/components/atoms/GameOverModal/GameOverModal";
 import { supabase } from "~/db.server";
+import { findWordByValue } from "~/models/words.server";
+import { json } from "@remix-run/server-runtime";
 
 export const loader = (meta: RequestMeta) =>
   middleware(meta, isAuthed, async (meta: RequestMeta) => {
@@ -64,6 +71,10 @@ export const action = async (meta: RequestMeta) => {
 
     const turnWord = turn.reduce((acc: string, cur) => acc + cur.letter, "");
     if (Array.isArray(turn) && !turnWord.includes("_")) {
+      const isValidWord = await findWordByValue(turnWord);
+      if (!isValidWord) {
+        return json({ error: "Not a valid word" });
+      }
       await saveTurn(turn.map(({ letter }) => letter).join(""), user.id);
       return await getProcessedGameForUser(user.id);
     }
@@ -75,6 +86,7 @@ export const action = async (meta: RequestMeta) => {
 export default function Game(props: {}) {
   const { processedTurns, isOver, hasWon, word }: ProcessedGame =
     useLoaderData();
+  const { error } = useActionData() ?? {};
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentTurn, setCurrentTurn] = useState<Array<GameTurn>>(
     new Array(5).fill({ letter: "_" })
@@ -176,6 +188,7 @@ export default function Game(props: {}) {
           {guessesGameBoard}
         </div>
         <div className="pb-4">
+          {error && <p className="text-center text-rose-600">{error}</p>}
           <div className="mt-2">
             <Keyboard
               turns={processedTurns}
