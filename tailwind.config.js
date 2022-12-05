@@ -26,6 +26,15 @@ module.exports = {
       logo: "'Bungee Outline', cursive",
       sans: "'Roboto', sans-serif",
     },
+    colors: {
+      background: "rgb(var(--color-primary))",
+      text: "rgb(var(--color-text))",
+      errors: "rgb(var(--color-errors))",
+      correctGuess: "rgb(var(--color-correctGuess))",
+      incorrectGuess: "rgb(var(--color-incorrectGuess))",
+      inWordGuess: "rgb(var(--color-inWordGuess))",
+      noGuess: "rgb(var(--color-noGuess))",
+    },
   },
   plugins: [require("tw-elements/dist/plugin")],
 };

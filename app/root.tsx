@@ -8,8 +8,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { useEffect } from "react";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
+import { updateCSSColors } from "./hooks/useColorThemes";
 
 export const links: LinksFunction = () => {
   return [
@@ -32,6 +34,7 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function App() {
+  useEffect(updateCSSColors, []);
   return (
     <html lang="en" className="h-full">
       <head>
