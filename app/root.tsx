@@ -1,4 +1,5 @@
 import type { LinksFunction, LoaderArgs, MetaFunction } from "@remix-run/node";
+import { bodyClickListener } from "./utils";
 
 import {
   Links,
@@ -41,7 +42,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
+      <body onClick={bodyClickListener} className="h-full">
         <Outlet />
         <ScrollRestoration />
         <script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></script>

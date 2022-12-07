@@ -1,5 +1,4 @@
 import { AnyObject } from "./types";
-import type { PTurn } from "./utils.server";
 
 export function validateEmail(email: unknown): email is string {
   return typeof email === "string" && email.length > 3 && email.includes("@");
@@ -82,6 +81,12 @@ export const bgHoverColorsByType = {
   notGuessed: "hover:bg-slate-100",
 };
 
+const defaultRGB = [0, 0, 0];
+export function parseRGBString(value?: string) {
+  return value?.split(" ").map((val) => Number(val)) ?? defaultRGB;
+}
+
+
 export function hexToRGB(h: string) {
   let r: number | string = 0,
     g: number | string = 0,
@@ -102,6 +107,16 @@ export function hexToRGB(h: string) {
   return +r + " " + +g + " " + +b;
 }
 
+function componentToHex(c:number) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+export function rgbToHex(rgb:string) {
+  const [r,g,b] = parseRGBString(rgb);
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
 export function createLookupForArrayObjectsByKey(key: string) {
   return (arr: Array<AnyObject>) =>
     arr.reduce((acc, cur) => {
@@ -111,4 +126,23 @@ export function createLookupForArrayObjectsByKey(key: string) {
 
       return acc;
     }, {});
+}
+
+export function stopProp(e:React.MouseEvent) {
+  return e.stopPropagation();
+}
+
+export type BodyClickListener = (e: React.MouseEvent) => void;
+export type UnsubBodyClickListener = () => boolean;
+const subscriptions: Map<BodyClickListener, true> = new Map();
+export function addBodyClickListener(callback: BodyClickListener) {
+  subscriptions.set(callback, true);
+  const unsub: UnsubBodyClickListener = () => subscriptions.delete(callback);
+  return unsub;
+}
+
+export function bodyClickListener(e: React.MouseEvent) {
+  subscriptions.forEach((_, listener) => {
+    listener(e);
+  });
 }

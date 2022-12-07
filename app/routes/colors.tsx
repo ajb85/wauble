@@ -1,11 +1,19 @@
 import { Form, useLoaderData } from "@remix-run/react";
 import { useCallback, useState } from "react";
-import { combineClasses, hexToRGB } from "~/utils";
+import {
+  combineClasses,
+  hexToRGB,
+  parseRGBString,
+  rgbToHex,
+  stopProp,
+} from "~/utils";
 import { ChromePicker } from "react-color";
 import useColorThemes from "~/hooks/useColorThemes";
+import useBodyClick from "~/hooks/useBodyClick";
 
-import type { ColorChangeHandler, ColorResult } from "react-color";
+import type { ColorChangeHandler } from "react-color";
 import type { RequestMeta } from "~/types";
+import { Logo } from "~/components/atoms";
 
 type Props = {};
 
@@ -29,7 +37,6 @@ export const loader = (meta: RequestMeta) => {
 export default function Colors(props: Props) {
   const colorThemes = useLoaderData();
   const [activeColorTheme, setActiveColorTheme] = useColorThemes(colorThemes);
-  console.log("ACT: ", activeColorTheme/);
 
   const [previewColors, setPreviewColors] = useState<
     Array<StaticColorSelectionProps>
@@ -38,28 +45,28 @@ export default function Colors(props: Props) {
       label: "Background",
       name: "background",
       className: "bg-background",
-      value: activeColorTheme.background,
+      value: activeColorTheme.colors.background,
     },
     {
       label: "Text",
       name: "text",
       className: "bg-text",
-      value: activeColorTheme.text,
+      value: activeColorTheme.colors.text,
     },
     {
       label: "Errors",
       name: "errors",
       className: "bg-errors",
-      value: activeColorTheme.errors,
+      value: activeColorTheme.colors.errors,
     },
     {
       label: "Correct Guess",
       name: "correctGuess",
       className: "bg-correctGuess",
-      value: activeColorTheme.correctGuess,
+      value: activeColorTheme.colors.correctGuess,
     },
   ]);
-  console.log("PREVIEW: ", previewColors);
+
   const updatePreviewColors = useCallback((name: string, color: string) => {
     setPreviewColors((p) =>
       p.map((c) => (c.name === name ? { ...c, value: color } : c))
@@ -67,8 +74,9 @@ export default function Colors(props: Props) {
   }, []);
 
   return (
-    <div className="mx-auto w-1/2">
-      <h2 className="mb-10">Pick your game colors!</h2>
+    <div className="mx-auto w-full max-w-[450px] px-12">
+      <Logo />
+      <h2 className="mb-10 pt-8 text-center">Pick your game colors!</h2>
       <Form>
         {previewColors.map((c) => (
           <ColorSelectionGroup
@@ -94,8 +102,11 @@ interface StaticColorSelectionProps {
 interface ColorSelectionProps extends StaticColorSelectionProps {
   onChange: (name: string, value: string) => void;
 }
+
 function ColorSelectionGroup(props: ColorSelectionProps) {
   const { onChange } = props;
+  const [isOpen, setIsOpen] = useState(false);
+  const [r, g, b] = parseRGBString(props.value);
 
   const handlePickerChange: ColorChangeHandler = useCallback(
     (color) => {
@@ -116,34 +127,39 @@ function ColorSelectionGroup(props: ColorSelectionProps) {
     [onChange]
   );
 
-  if (!props.value) {
-    return null;
-  }
+  const openColorPicker = useCallback(() => setIsOpen((v) => true), []);
+  const closeColorPicker = useCallback(() => setIsOpen((v) => false), []);
 
-  const [r, g, b] = props.value?.split(" ").map((val) => Number(val)) ?? [
-    "",
-    "",
-    "",
-  ];
+  useBodyClick(closeColorPicker);
 
   return (
-    <label className="border-black inline-blocks mb-6 flex w-full items-center justify-end border-2 border-solid">
-      {props.label}
+    <div
+      className="border-black inline-blocks z-0 mb-6 flex w-full items-center justify-end border-2 border-solid"
+      onClick={stopProp}
+    >
+      <label className="min-w-[120px] px-2">{props.label}</label>
       <input
-        className="bg-slate-400 border-black mx-2 border-l-2 border-solid p-2 text-right"
+        className="bg-slate-400 border-black border-l-2 border-solid p-2 text-right"
         name={props.name}
-        value={props.value}
+        value={props.value ? rgbToHex(props.value) : ""}
         onChange={handleInputChange}
       />
-      <div className="border-black relative flex cursor-pointer items-center justify-center border-l-2 border-solid p-2">
+      <div
+        onClick={openColorPicker}
+        className="border-black relative flex cursor-pointer items-center justify-center border-l-2 border-solid p-2"
+      >
         <div
+          style={{ backgroundColor: rgbToHex(props.value) }}
           className={combineClasses(
-            "border-black inline-block h-6 w-6 border-2 border-solid p-2",
-            props.className
+            "border-black inline-block h-6 w-6 border-2 border-solid p-2"
           )}
         />
-        <ChromePicker color={{ r, g, b }} onChange={handlePickerChange} />
+        {isOpen && (
+          <div className="absolute z-10">
+            <ChromePicker color={{ r, g, b }} onChange={handlePickerChange} />
+          </div>
+        )}
       </div>
-    </label>
+    </div>
   );
 }
