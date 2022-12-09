@@ -6,3 +6,4 @@ export { default as Turn } from "./Turn/Turn";
 export { default as LoadingIcon } from "./LoadingIcon/LoadingIcon";
 export { default as Modal } from "./Modal/Modal";
 export { default as Select } from "./Select/Select";
+export { default as Button } from "./Button/Button";

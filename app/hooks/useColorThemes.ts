@@ -15,6 +15,7 @@ export type Colors = {
 export type ColorTheme = {
   name: string;
   colors: Colors;
+  preset?: boolean;
 };
 
 export function updateCSSColors(colorTheme: ColorTheme = defaultTheme) {
@@ -39,6 +40,7 @@ const defaultTheme: ColorTheme = {
     inWordGuess: "253 224 71",
     noGuess: "0 0 0",
   },
+  preset: true,
 };
 
 const createColorThemeLookup = createLookupForArrayObjectsByKey("name");

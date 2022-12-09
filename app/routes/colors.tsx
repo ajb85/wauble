@@ -14,7 +14,7 @@ import useBodyClick from "~/hooks/useBodyClick";
 import type { ColorChangeHandler } from "react-color";
 import type { ColorTheme } from "~/hooks/useColorThemes";
 import type { RequestMeta } from "~/types";
-import { Logo, Select } from "~/components/atoms";
+import { Button, Logo, Select } from "~/components/atoms";
 
 type Props = {};
 
@@ -31,6 +31,7 @@ export const loader = (meta: RequestMeta) => {
         inWordGuess: "253 224 71",
         noGuess: "0 0 0",
       },
+      preset: true,
     },
     {
       name: "custom",
@@ -52,6 +53,7 @@ export type PreviewColor = Array<StaticColorSelectionProps>;
 export default function Colors(props: Props) {
   const colorThemes: Array<ColorTheme> = useLoaderData();
   const [activeColorTheme, setActiveColorTheme] = useColorThemes(colorThemes);
+  const [themeName, setThemeName] = useState<string>("");
   const convertedColorTheme = useMemo(
     () => convertThemeToPreview(activeColorTheme),
     [activeColorTheme]
@@ -65,9 +67,20 @@ export default function Colors(props: Props) {
     );
   }, []);
 
-  useEffect(() => {
+  const resetPreviewColors = useCallback(() => {
     setPreviewColors(convertedColorTheme);
-  }, [convertedColorTheme]);
+    setThemeName(activeColorTheme.preset ? "" : activeColorTheme.name);
+  }, [activeColorTheme, convertedColorTheme]);
+
+  // Update colors to new theme if the active theme changes
+  useEffect(() => {
+    resetPreviewColors;
+  }, [resetPreviewColors]);
+
+  const hasBeenChanged =
+    !previewColors.every(
+      (c) => c.value === activeColorTheme.colors[c.name as keyof Colors]
+    ) || true;
 
   return (
     <div className="mx-auto w-full max-w-[450px] px-12">
@@ -79,8 +92,32 @@ export default function Colors(props: Props) {
         onSelect={(e) =>
           setActiveColorTheme((e.target as HTMLTextAreaElement).value)
         }
-        options={colorThemes.map((ct) => ({ label: ct.name, value: ct.name }))}
+        options={colorThemes.map((ct) => ({
+          label: ct.name,
+          value: ct.name,
+        }))}
       />
+      {hasBeenChanged && (
+        <Form className="flex w-[100px] items-center">
+          <input
+            type="text"
+            name="name"
+            value={themeName}
+            placeholder="Theme Name"
+            className="border-black border-2 border-solid p-2"
+          />
+          <Button
+            className="mx-2 block"
+            type="submit"
+            disabled={!themeName.length}
+          >
+            Save
+          </Button>
+          <Button type="button" onClick={resetPreviewColors}>
+            Cancel
+          </Button>
+        </Form>
+      )}
       <Form>
         {previewColors.map((c) => (
           <ColorSelectionGroup
@@ -141,9 +178,9 @@ function ColorSelectionGroup(props: ColorSelectionProps) {
       className="border-black inline-blocks z-0 mb-6 flex w-full items-center justify-end rounded-md border-2 border-solid"
       onClick={stopProp}
     >
-      <label className="min-w-[120px] px-2">{props.label}</label>
+      <label className="px-2">{props.label}</label>
       <input
-        className="bg-slate-400 border-black border-l-2 border-solid p-2 text-right"
+        className="bg-slate-400 border-black w-[150px] border-l-2 border-solid p-2 text-right"
         name={props.name}
         value={props.value ? rgbToHex(props.value) : ""}
         onChange={handleInputChange}
