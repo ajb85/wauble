@@ -43,7 +43,9 @@ const defaultTheme: ColorTheme = {
 
 const createColorThemeLookup = createLookupForArrayObjectsByKey("name");
 
-export default function useColorTheme(allThemes: Array<ColorTheme>) {
+export default function useColorTheme(
+  allThemes: Array<ColorTheme>
+): [ColorTheme, (s: string) => void] {
   const colorThemesLookup = useMemo(
     () => createColorThemeLookup(allThemes),
     [allThemes]

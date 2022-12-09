@@ -86,7 +86,6 @@ export function parseRGBString(value?: string) {
   return value?.split(" ").map((val) => Number(val)) ?? defaultRGB;
 }
 
-
 export function hexToRGB(h: string) {
   let r: number | string = 0,
     g: number | string = 0,
@@ -107,13 +106,13 @@ export function hexToRGB(h: string) {
   return +r + " " + +g + " " + +b;
 }
 
-function componentToHex(c:number) {
+function componentToHex(c: number) {
   var hex = c.toString(16);
   return hex.length == 1 ? "0" + hex : hex;
 }
 
-export function rgbToHex(rgb:string) {
-  const [r,g,b] = parseRGBString(rgb);
+export function rgbToHex(rgb: string) {
+  const [r, g, b] = parseRGBString(rgb);
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
@@ -121,14 +120,14 @@ export function createLookupForArrayObjectsByKey(key: string) {
   return (arr: Array<AnyObject>) =>
     arr.reduce((acc, cur) => {
       if (cur[key]) {
-        acc[key] = cur;
+        acc[cur[key]] = cur;
       }
 
       return acc;
     }, {});
 }
 
-export function stopProp(e:React.MouseEvent) {
+export function stopProp(e: React.MouseEvent) {
   return e.stopPropagation();
 }
 
@@ -145,4 +144,25 @@ export function bodyClickListener(e: React.MouseEvent) {
   subscriptions.forEach((_, listener) => {
     listener(e);
   });
+}
+
+export function toDisplayCase(s: string) {
+  let capNext = false;
+  return s.split("").reduce((str, char, i) => {
+    if (char === " ") {
+      capNext = true;
+      str += char;
+    } else if (capNext || i === 0) {
+      str += char.toUpperCase();
+      capNext = false;
+    } else if (char.toUpperCase() === char) {
+      if (str[str.length - 1] !== " ") {
+        str += " ";
+      }
+      str += char;
+    } else {
+      str += char;
+    }
+    return str;
+  }, "");
 }

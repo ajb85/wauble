@@ -1,19 +1,20 @@
 import { Form, useLoaderData } from "@remix-run/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  combineClasses,
   hexToRGB,
   parseRGBString,
   rgbToHex,
   stopProp,
+  toDisplayCase,
 } from "~/utils";
 import { ChromePicker } from "react-color";
-import useColorThemes from "~/hooks/useColorThemes";
+import useColorThemes, { Colors } from "~/hooks/useColorThemes";
 import useBodyClick from "~/hooks/useBodyClick";
 
 import type { ColorChangeHandler } from "react-color";
+import type { ColorTheme } from "~/hooks/useColorThemes";
 import type { RequestMeta } from "~/types";
-import { Logo } from "~/components/atoms";
+import { Logo, Select } from "~/components/atoms";
 
 type Props = {};
 
@@ -31,41 +32,32 @@ export const loader = (meta: RequestMeta) => {
         noGuess: "0 0 0",
       },
     },
+    {
+      name: "custom",
+      colors: {
+        background: "227 226 226",
+        text: "25 25 25",
+        errors: "0 173 170",
+        correctGuess: "113 113 122",
+        incorrectGuess: "190 242 100",
+        inWordGuess: "0 0 0",
+        noGuess: "253 224 71",
+      },
+    },
   ];
 };
 
-export default function Colors(props: Props) {
-  const colorThemes = useLoaderData();
-  const [activeColorTheme, setActiveColorTheme] = useColorThemes(colorThemes);
+export type PreviewColor = Array<StaticColorSelectionProps>;
 
-  const [previewColors, setPreviewColors] = useState<
-    Array<StaticColorSelectionProps>
-  >([
-    {
-      label: "Background",
-      name: "background",
-      className: "bg-background",
-      value: activeColorTheme.colors.background,
-    },
-    {
-      label: "Text",
-      name: "text",
-      className: "bg-text",
-      value: activeColorTheme.colors.text,
-    },
-    {
-      label: "Errors",
-      name: "errors",
-      className: "bg-errors",
-      value: activeColorTheme.colors.errors,
-    },
-    {
-      label: "Correct Guess",
-      name: "correctGuess",
-      className: "bg-correctGuess",
-      value: activeColorTheme.colors.correctGuess,
-    },
-  ]);
+export default function Colors(props: Props) {
+  const colorThemes: Array<ColorTheme> = useLoaderData();
+  const [activeColorTheme, setActiveColorTheme] = useColorThemes(colorThemes);
+  const convertedColorTheme = useMemo(
+    () => convertThemeToPreview(activeColorTheme),
+    [activeColorTheme]
+  );
+  const [previewColors, setPreviewColors] =
+    useState<PreviewColor>(convertedColorTheme);
 
   const updatePreviewColors = useCallback((name: string, color: string) => {
     setPreviewColors((p) =>
@@ -73,10 +65,22 @@ export default function Colors(props: Props) {
     );
   }, []);
 
+  useEffect(() => {
+    setPreviewColors(convertedColorTheme);
+  }, [convertedColorTheme]);
+
   return (
     <div className="mx-auto w-full max-w-[450px] px-12">
       <Logo />
       <h2 className="mb-10 pt-8 text-center">Pick your game colors!</h2>
+      <Select
+        label="Color Theme"
+        value={activeColorTheme.name}
+        onSelect={(e) =>
+          setActiveColorTheme((e.target as HTMLTextAreaElement).value)
+        }
+        options={colorThemes.map((ct) => ({ label: ct.name, value: ct.name }))}
+      />
       <Form>
         {previewColors.map((c) => (
           <ColorSelectionGroup
@@ -119,22 +123,22 @@ function ColorSelectionGroup(props: ColorSelectionProps) {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = e.target;
-      const isValidHex = /^#([0-9A-F]{3}){1,2}$/i;
-      if (isValidHex.test(value)) {
+      const validHexRegex = /^#([0-9A-F]{3}){1,2}$/i;
+      if (validHexRegex.test(value)) {
         onChange(name, hexToRGB(value));
       }
     },
     [onChange]
   );
 
-  const openColorPicker = useCallback(() => setIsOpen((v) => true), []);
-  const closeColorPicker = useCallback(() => setIsOpen((v) => false), []);
+  const openColorPicker = useCallback(() => setIsOpen(() => true), []);
+  const closeColorPicker = useCallback(() => setIsOpen(() => false), []);
 
   useBodyClick(closeColorPicker);
 
   return (
     <div
-      className="border-black inline-blocks z-0 mb-6 flex w-full items-center justify-end border-2 border-solid"
+      className="border-black inline-blocks z-0 mb-6 flex w-full items-center justify-end rounded-md border-2 border-solid"
       onClick={stopProp}
     >
       <label className="min-w-[120px] px-2">{props.label}</label>
@@ -146,13 +150,11 @@ function ColorSelectionGroup(props: ColorSelectionProps) {
       />
       <div
         onClick={openColorPicker}
-        className="border-black relative flex cursor-pointer items-center justify-center border-l-2 border-solid p-2"
+        className="border-black bg-white relative flex cursor-pointer items-center justify-center border-l-2 border-solid p-2"
       >
         <div
           style={{ backgroundColor: rgbToHex(props.value) }}
-          className={combineClasses(
-            "border-black inline-block h-6 w-6 border-2 border-solid p-2"
-          )}
+          className="border-black inline-block h-6 w-6 border-2 border-solid p-2"
         />
         {isOpen && (
           <div className="absolute z-10">
@@ -162,4 +164,13 @@ function ColorSelectionGroup(props: ColorSelectionProps) {
       </div>
     </div>
   );
+}
+
+function convertThemeToPreview(activeColorTheme: ColorTheme) {
+  return Object.keys(activeColorTheme.colors).map((c: string) => ({
+    label: toDisplayCase(c),
+    name: `${c}`,
+    className: `bg-${c}`,
+    value: activeColorTheme.colors[c as keyof Colors],
+  }));
 }
