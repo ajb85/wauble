@@ -17,11 +17,11 @@ type Props = {
 
 const themeToColors: ButtonThemes = {
   submit:
-    "bg-submitButtonBackground text-submitButtonText border-submitButtonText",
+    "bg-submitButtonBackground text-submitButtonText border-submitButtonBorder",
   cancel:
-    "bg-cancelButtonBackground text-cancelButtonText border-cancelButtonText",
+    "bg-cancelButtonBackground text-cancelButtonText border-cancelButtonBorder",
   delete:
-    "bg-deleteButtonBackground text-deleteButtonText border-deleteButtonText",
+    "bg-deleteButtonBackground text-deleteButtonText border-deleteButtonBorder",
 };
 
 export default function Button(props: Props) {

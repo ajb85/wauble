@@ -69,16 +69,16 @@ export default function ColorsPage(props: Props) {
     <div className="mx-auto w-full max-w-[450px] px-12">
       <Logo />
       <h2 className="mb-10 pt-8 text-center">Pick your game colors!</h2>
-      <ThemeControls
-        activeColorTheme={activeColorTheme}
-        colorThemes={colorThemes}
-        onSelect={handleSelect}
-        onNameChange={handleThemeNameChange}
-        themeName={themeName}
-        disableSubmitButton={hasBeenChanged}
-        resetColors={resetPreviewTheme}
-      />
       <Form>
+        <ThemeControls
+          activeColorTheme={activeColorTheme}
+          colorThemes={colorThemes}
+          onSelect={handleSelect}
+          onNameChange={handleThemeNameChange}
+          themeName={themeName}
+          disableSubmitButton={hasBeenChanged}
+          resetColors={resetPreviewTheme}
+        />
         <ColorGroup
           title="App"
           example={
@@ -146,6 +146,32 @@ export default function ColorsPage(props: Props) {
             { label: "Correct Guess Text", key: "correctGuessText" },
           ]}
         />
+        <ColorGroup
+          title="Buttons"
+          example={
+            <div>
+              <Button className="mx-2" type="button" theme="submit">
+                Submit
+              </Button>
+              <Button className="mx-2" type="button" theme="delete">
+                {"<<"}
+              </Button>
+              <Button className="mx-2" type="button" theme="cancel">
+                Cancel
+              </Button>
+            </div>
+          }
+          theme={previewTheme}
+          onThemeChange={updatePreviewTheme}
+          colors={[
+            { label: "Submit Background", key: "submitButtonBackground" },
+            { label: "Submit Text", key: "submitButtonText" },
+            { label: "Delete Background", key: "deleteButtonBackground" },
+            { label: "Delete Text", key: "deleteButtonText" },
+            { label: "Cancel Background", key: "cancelButtonBackground" },
+            { label: "Cancel Text", key: "cancelButtonText" },
+          ]}
+        />
       </Form>
     </div>
   );
@@ -188,7 +214,7 @@ function ThemeControls(props: ThemeControlsProps) {
   );
 
   return (
-    <>
+    <section className="bg-white py-2 px-4 text-black">
       <Select
         label="Color Theme"
         value={activeColorTheme.name}
@@ -196,7 +222,7 @@ function ThemeControls(props: ThemeControlsProps) {
         options={colorOptions}
       />
       {props.disableSubmitButton ? (
-        <Form className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <input
             type="text"
             name="name"
@@ -223,11 +249,11 @@ function ThemeControls(props: ThemeControlsProps) {
               Cancel
             </Button>
           </div>
-        </Form>
+        </div>
       ) : (
         <div className="mb-4 min-h-[44px]" />
       )}
-    </>
+    </section>
   );
 }
 
@@ -265,7 +291,7 @@ function ColorGroup(props: ColorGroupProps) {
   );
 
   return (
-    <section className="mb-4">
+    <section className="mb-6">
       <h3 className="text-center text-2xl font-bold">{props.title}</h3>
       {props.colors.map(({ key, label }) => {
         const value = props.theme.colors[key];

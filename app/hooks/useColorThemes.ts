@@ -60,7 +60,7 @@ export const defaultColorTheme: ColorTheme = {
     deleteButtonBackground: "159 18 57",
     cancelButtonBackground: "255 255 255",
     submitButtonText: "0 0 0",
-    deleteButtonText: "255 255 255",
+    deleteButtonText: "0 0 0",
     cancelButtonText: "0 0 0",
     submitButtonBorder: "0 0 0",
     deleteButtonBorder: "0 0 0",
