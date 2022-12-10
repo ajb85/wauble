@@ -13,6 +13,7 @@ import type { ColorTheme, Colors } from "~/hooks/useColorThemes";
 import type { RequestMeta } from "~/types";
 import { Button, Logo, Select } from "~/components/atoms";
 import { TurnCharacter } from "~/components/atoms/Turn/Turn";
+import { SingleKey } from "~/components/atoms/Keyboard/Keyboard";
 
 type Props = {};
 
@@ -97,31 +98,39 @@ export default function ColorsPage(props: Props) {
         <ColorGroup
           title="Guesses and Keyboard"
           example={
-            <div className="flex">
-              <TurnCharacter
-                isCorrect={false}
-                isInWord={false}
-                isPTurn={false}
-                letter="T"
-              />
-              <TurnCharacter
-                isCorrect={false}
-                isInWord
-                isPTurn={false}
-                letter="E"
-              />
-              <TurnCharacter
-                isCorrect={false}
-                isInWord={false}
-                isPTurn
-                letter="S"
-              />
-              <TurnCharacter
-                isCorrect
-                isInWord={false}
-                isPTurn={false}
-                letter="T"
-              />
+            <div>
+              <div className="flex">
+                <TurnCharacter
+                  isCorrect={false}
+                  isInWord={false}
+                  isPTurn={false}
+                  letter="T"
+                />
+                <TurnCharacter
+                  isCorrect={false}
+                  isInWord
+                  isPTurn={false}
+                  letter="E"
+                />
+                <TurnCharacter
+                  isCorrect={false}
+                  isInWord={false}
+                  isPTurn
+                  letter="S"
+                />
+                <TurnCharacter
+                  isCorrect
+                  isInWord={false}
+                  isPTurn={false}
+                  letter="T"
+                />
+              </div>
+              <div className="mt-4 flex">
+                <SingleKey className="mx-1" letter="T" status="notGuessed" />
+                <SingleKey className="mx-2" letter="E" status="inWord" />
+                <SingleKey className="mx-2" letter="S" status="wrong" />
+                <SingleKey className="mx-2" letter="T" status="correct" />
+              </div>
             </div>
           }
           theme={previewTheme}

@@ -67,7 +67,14 @@ export function getFromDataFromObject(
   return formData;
 }
 
-export const bgColorsByType = {
+export type GuessColors = {
+  correct: string;
+  inWord: string;
+  wrong: string;
+  notGuessed: string;
+};
+
+export const bgColorsByType: GuessColors = {
   correct: "bg-correctGuessBackground text-correctGuessText", //"bg-lime-300",
   inWord: "bg-inWordGuessBackground text-inWordGuessText", //"bg-yellow-300",
   wrong: "bg-incorrectGuessBackground text-incorrectGuessText", //"bg-zinc-500",
