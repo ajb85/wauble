@@ -1,10 +1,10 @@
-.slantBG {
+.slantBackground {
   height: 100vh;
   margin: 0;
   background: yellow;
 }
 
-.slantBG:before {
+.slantBackground:before {
   content: "";
   position: absolute;
   top: 0;

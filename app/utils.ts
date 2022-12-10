@@ -68,10 +68,10 @@ export function getFromDataFromObject(
 }
 
 export const bgColorsByType = {
-  correct: "bg-lime-300",
-  inWord: "bg-yellow-300",
-  wrong: "bg-zinc-500",
-  notGuessed: "shadow-slate-300",
+  correct: "bg-correctGuessBackground text-correctGuessText", //"bg-lime-300",
+  inWord: "bg-inWordGuessBackground text-inWordGuessText", //"bg-yellow-300",
+  wrong: "bg-incorrectGuessBackground text-incorrectGuessText", //"bg-zinc-500",
+  notGuessed: "bg-noGuessBackground text-noGuessText", //"shadow-slate-300"
 };
 
 export const bgHoverColorsByType = {
@@ -165,4 +165,53 @@ export function toDisplayCase(s: string) {
     }
     return str;
   }, "");
+}
+
+export function isNumber(num: any) {
+  return !isNaN(Number(num));
+}
+
+export type DebounceConfig = {
+  delay?: number;
+};
+
+type DebounceCallback = (...args: Array<any>) => any;
+export function leadingDebounce(cb: DebounceCallback, config: DebounceConfig) {
+  const { delay } = config;
+  const timeoutDelay = isNumber(delay) ? delay : 250;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  const resetDebounce = () => {
+    timeout = null;
+  };
+
+  return (...args: Array<any>) => {
+    let didRun = false;
+    let value: any;
+    if (!timeout) {
+      didRun = true;
+      value = cb(...args);
+    } else {
+      didRun = false;
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(resetDebounce, timeoutDelay);
+    return value;
+  };
+}
+
+export function trailingDebounce(cb: DebounceCallback, config: DebounceConfig) {
+  const { delay } = config;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  const resolves = [];
+  const timeoutDelay = isNumber(delay) ? delay : 250;
+
+  return (...args: Array<any>) => {
+    timeout && clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      cb(...args);
+      timeout = null;
+    }, timeoutDelay);
+  };
 }

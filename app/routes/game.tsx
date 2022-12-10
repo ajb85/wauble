@@ -5,7 +5,7 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Keyboard, Guesses, Logo } from "~/components/atoms";
+import { Keyboard, Guesses, Logo, Button } from "~/components/atoms";
 
 import { RequestMeta } from "~/types";
 import middleware, { isAuthed } from "~/middleware";
@@ -20,7 +20,6 @@ import {
   processTurns,
 } from "~/utils.server";
 import type { GameTurn } from "~/utils.server";
-import { combineClasses } from "~/utils";
 import { getTurnsForGame, saveTurn } from "~/models/turns.server";
 import GameOverModal from "~/components/atoms/GameOverModal/GameOverModal";
 import { supabase } from "~/db.server";
@@ -172,7 +171,7 @@ export default function Game(props: {}) {
         ref={formRef}
         method="post"
         onSubmit={handleSubmit}
-        className="mx-auto flex h-screen max-w-[400px] flex-col justify-between"
+        className="mx-auto flex h-[90vh] max-w-[400px] flex-col justify-between"
       >
         <div>
           <GameOverModal isOver={isOver} hasWon={hasWon} word={word ?? ""}>
@@ -197,28 +196,23 @@ export default function Game(props: {}) {
               disabled={isOver || isLoading}
             />
           </div>
-          <div className={combineClasses("flex justify-center")}>
-            <button
+          <div className="flex justify-center">
+            <Button
               disabled={isSubmitDisabled}
-              className={combineClasses(
-                "mr-10 h-10 w-1/2 rounded-md border-2 border-solid border-green-900",
-                isSubmitDisabled
-                  ? "bg-green-700 text-slate-400"
-                  : "bg-green-500 text-white"
-              )}
+              className="mr-10 h-10 w-1/2"
               type="submit"
+              theme="submit"
             >
               Submit Turn
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handleDelete}
-              className={combineClasses(
-                "w-1/4 rounded-md bg-rose-800 text-white"
-              )}
+              className="w-1/4"
+              theme="delete"
             >
               {"<<"}
-            </button>
+            </Button>
           </div>
         </div>
       </Form>

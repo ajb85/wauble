@@ -21,19 +21,43 @@ module.exports = {
       animation: {
         "shake-text": "shake 0.5s linear infinite",
       },
+      colors: {
+        background: "rgb(var(--color-background)  / <alpha-value>)",
+        text: "rgb(var(--color-text)  / <alpha-value>)",
+        errors: "rgb(var(--color-errors)  / <alpha-value>)",
+        correctGuessBackground:
+          "rgb(var(--color-correctGuessBackground)  / <alpha-value>)",
+        incorrectGuessBackground:
+          "rgb(var(--color-incorrectGuessBackground)  / <alpha-value>)",
+        inWordGuessBackground:
+          "rgb(var(--color-inWordGuessBackground)  / <alpha-value>)",
+        correctGuessText: "rgb(var(--color-correctGuessText)  / <alpha-value>)",
+        incorrectGuessText:
+          "rgb(var(--color-incorrectGuessText)  / <alpha-value>)",
+        inWordGuessText: "rgb(var(--color-inWordGuessText)  / <alpha-value>)",
+        noGuessBackground:
+          "rgb(var(--color-noGuessBackground)  / <alpha-value>)",
+        noGuessText: "rgb(var(--color-noGuessText)  / <alpha-value>)",
+        submitButtonBackground:
+          "rgb(var(--color-submitButtonBackground)  / <alpha-value>)",
+        deleteButtonBackground:
+          "rgb(var(--color-deleteButtonBackground)  / <alpha-value>)",
+        cancelButtonBackground:
+          "rgb(var(--color-cancelButtonBackground)  / <alpha-value>)",
+        submitButtonText: "rgb(var(--color-submitButtonText)  / <alpha-value>)",
+        deleteButtonText: "rgb(var(--color-deleteButtonText)  / <alpha-value>)",
+        cancelButtonText: "rgb(var(--color-cancelButtonText)  / <alpha-value>)",
+        submitButtonBorder:
+          "rgb(var(--color-submitButtonBorder)  / <alpha-value>)",
+        deleteButtonBorder:
+          "rgb(var(--color-deleteButtonBorder)  / <alpha-value>)",
+        cancelButtonBorder:
+          "rgb(var(--color-cancelButtonBorder)  / <alpha-value>)",
+      },
     },
     fontFamily: {
       logo: "'Bungee Outline', cursive",
       sans: "'Roboto', sans-serif",
-    },
-    colors: {
-      background: "rgb(var(--color-primary))",
-      text: "rgb(var(--color-text))",
-      errors: "rgb(var(--color-errors))",
-      correctGuess: "rgb(var(--color-correctGuess))",
-      incorrectGuess: "rgb(var(--color-incorrectGuess))",
-      inWordGuess: "rgb(var(--color-inWordGuess))",
-      noGuess: "rgb(var(--color-noGuess))",
     },
   },
   plugins: [require("tw-elements/dist/plugin")],

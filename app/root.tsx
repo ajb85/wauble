@@ -12,11 +12,13 @@ import {
 import { useEffect } from "react";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
+import globalStyles from "./styles/global.css";
 import { updateCSSColors } from "./hooks/useColorThemes";
 
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: tailwindStylesheetUrl },
+    { rel: "stylesheet", href: globalStyles },
     {
       rel: "stylesheet",
       href: "https://fonts.googleapis.com/css2?family=Bungee+Outline&family=Roboto&display=swap",
@@ -42,7 +44,10 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body onClick={bodyClickListener} className="h-full">
+      <body
+        onClick={bodyClickListener}
+        className="h-full bg-background font-sans text-text"
+      >
         <Outlet />
         <ScrollRestoration />
         <script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></script>
