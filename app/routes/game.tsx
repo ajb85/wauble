@@ -166,7 +166,7 @@ export default function Game(props: {}) {
     />
   );
   return (
-    <div className="ml-2 w-[98%]">
+    <main className="ml-2 w-[98%]">
       <Form
         ref={formRef}
         method="post"
@@ -216,6 +216,6 @@ export default function Game(props: {}) {
           </div>
         </div>
       </Form>
-    </div>
+    </main>
   );
 }
