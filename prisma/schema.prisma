@@ -8,14 +8,14 @@ generator client {
 }
 
 model Profiles {
-  id        String   @id
-  email     String   @unique
-  image     String?
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
-  Games     Games[]
-  Turns     Turns[]
-  Theme     Theme[]
+  id          String        @id
+  email       String        @unique
+  image       String?
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @default(now()) @updatedAt @db.Timestamptz(3)
+  Games       Games[]
+  Turns       Turns[]
+  ColorThemes ColorThemes[]
 }
 
 model Words {
