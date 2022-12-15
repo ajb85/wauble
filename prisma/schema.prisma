@@ -15,6 +15,7 @@ model Profiles {
   updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
   Games     Games[]
   Turns     Turns[]
+  Theme     Theme[]
 }
 
 model Words {
@@ -40,13 +41,25 @@ model Games {
 }
 
 model Turns {
-  id   String @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
+  id    String @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
   guess String
 
   user    Profiles @relation(fields: [user_id], references: [id])
   user_id String
   game    Games    @relation(fields: [game_id], references: [id])
   game_id String
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+}
+
+model ColorThemes {
+  id     String @id @default(dbgenerated("(gen_random_uuid())::TEXT"))
+  name   String
+  colors Json
+
+  user    Profiles? @relation(fields: [user_id], references: [id])
+  user_id String?
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
