@@ -1,4 +1,5 @@
 import { supabase } from "~/db.server";
+import type { StringObject } from "~/types";
 
 const table = "ColorThemes";
 const selectProperties = "id, name, colors";
@@ -26,32 +27,106 @@ export type Colors = {
   cancelButtonBorder: string;
 };
 
+export const colorKeys: Array<keyof Colors> = [
+  "background",
+  "text",
+  "errors",
+  "correctGuessBackground",
+  "incorrectGuessBackground",
+  "inWordGuessBackground",
+  "noGuessBackground",
+  "correctGuessText",
+  "noGuessText",
+  "incorrectGuessText",
+  "inWordGuessText",
+  "submitButtonBackground",
+  "cancelButtonBackground",
+  "deleteButtonBackground",
+  "submitButtonText",
+  "cancelButtonText",
+  "deleteButtonText",
+  "submitButtonBorder",
+  "deleteButtonBorder",
+  "cancelButtonBorder",
+];
+
+export const getNewColor = (): Colors => {
+  // @ts-ignore - Typescript sucks at seeing an object being built and gets mad not all properties are there immediately
+  return colorKeys.reduce((acc: Colors, cur) => {
+    acc[cur] = "#000";
+    return acc;
+  }, {});
+};
+
 export interface ColorThemeBase {
-  name: string,
-  colors: Colors,
-  preset?:boolean;
+  name: string;
+  colors: Colors;
+  preset?: boolean;
 }
 
 export interface ColorTheme extends ColorThemeBase {
-  id:string,
+  id: string;
 }
 
-export async function getPresetColorThemes():Promise<Array<ColorTheme>> {
-  const {data: colors} = await supabase.from(table).select(selectProperties).eq("user_id",null);
-  return colors?.map(c => ({...c, preset:true})) || [];
+export async function getPresetColorThemes(): Promise<Array<ColorTheme>> {
+  const { data: colors } = await supabase
+    .from(table)
+    .select(selectProperties)
+    .eq("user_id", null);
+  return colors?.map((c) => ({ ...c, preset: true })) || [];
 }
 
-export async function getColorThemesForUser(user_id: string): Promise<Array<ColorTheme>> {
+export async function getColorThemesForUser(
+  user_id: string
+): Promise<Array<ColorTheme>> {
   const presetColorThemes = await getPresetColorThemes();
   const { data: userColorThemes } = await supabase
     .from(table)
     .select(selectProperties)
-    .eq("user_id", user_id)
+    .eq("user_id", user_id);
 
   return [...presetColorThemes, ...(userColorThemes ?? [])];
 }
 
-export async function upsertUsersColorTheme(colorTheme:ColorThemeBase | ColorTheme, user_id:string) {
-  const {data} = await supabase.from(table).upsert({...colorTheme, user_id });
+export async function upsertUsersColorTheme(
+  colorTheme: ColorThemeBase | ColorTheme,
+  user_id: string
+) {
+  const { data } = await supabase
+    .from(table)
+    .upsert({ ...colorTheme, user_id })
+    .select(selectProperties)
+    .limit(1)
+    .single();
   return data;
+}
+
+export async function getPresetColorThemeByName(
+  name: string
+): Promise<ColorTheme | null> {
+  // const { data: userTheme } = await supabase
+  //   .from(table)
+  //   .select(selectProperties)
+  //   .eq("user_id", user_id)
+  //   .eq("name", name)
+  //   .limit(1)
+  //   .single();
+
+  // if (userTheme) {
+  //   return userTheme;
+  // }
+
+  const { data: presetTheme } = await supabase
+    .from(table)
+    .select(selectProperties)
+    .eq("user_id", null)
+    .eq("name", name)
+    .limit(1)
+    .single();
+
+  if (presetTheme) {
+    return { ...presetTheme, preset: true };
+  }
+
+  return null;
 }

@@ -1,31 +1,86 @@
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { hexToRGB, parseRGBString, rgbToHex, trailingDebounce } from "~/utils";
 import { ChromePicker } from "react-color";
-import useColorThemes, {
-  defaultColorTheme,
-  updateCSSColors,
-} from "~/hooks/useColorThemes";
+import useColorThemes, { updateCSSColors } from "~/hooks/useColorThemes";
 import useBodyClick from "~/hooks/useBodyClick";
 
 import type { ColorChangeHandler } from "react-color";
-import type { ColorTheme, Colors } from "~/hooks/useColorThemes";
+import type { ColorTheme, Colors } from "~/models/colorThemes.server";
 import type { RequestMeta } from "~/types";
-import { Button, Logo, Select } from "~/components/atoms";
+import { Button, ErrorMessage, Logo, Select } from "~/components/atoms";
 import { TurnCharacter } from "~/components/atoms/Turn/Turn";
 import { SingleKey } from "~/components/atoms/Keyboard/Keyboard";
+import { getFormData, getFromRequest } from "~/utils.server";
+import middleware, { isAuthed } from "~/middleware";
+import * as ColorThemeQueries from "~/models/colorThemes.server";
 
 type Props = {};
+type ActionFormErrors = { name?: string };
+type ActionResults =
+  | undefined
+  | { data?: ColorTheme; errors: ActionFormErrors };
 
-export const loader = (meta: RequestMeta) => {
-  return [defaultColorTheme];
-};
+export const loader = (meta: RequestMeta) =>
+  middleware(meta, isAuthed, async (meta: RequestMeta) => {
+    const user = getFromRequest(meta, "user");
+    return await ColorThemeQueries.getColorThemesForUser(user.id);
+  });
+
+export const action = (meta: RequestMeta) =>
+  middleware(
+    meta,
+    isAuthed,
+    async (meta: RequestMeta): Promise<ActionResults> => {
+      try {
+        const formData = await getFormData(meta);
+        const user = getFromRequest(meta, "user");
+
+        const existingPreset =
+          await ColorThemeQueries.getPresetColorThemeByName(formData.name);
+        if (existingPreset) {
+          return {
+            errors: { name: "Cannot use the same name as a preset theme." },
+          };
+        }
+
+        const colors = ColorThemeQueries.colorKeys.reduce(
+          (acc: Colors, key) => {
+            if (acc[key]) {
+              acc[key] = formData[key];
+            }
+            return acc;
+          },
+          ColorThemeQueries.getNewColor()
+        );
+
+        const upsertedTheme = await ColorThemeQueries.upsertUsersColorTheme(
+          {
+            name: formData.name,
+            colors,
+          },
+          user.id
+        );
+
+        if (!upsertedTheme) {
+          throw new Error("No upsert");
+        }
+
+        return { data: upsertedTheme, errors: {} };
+      } catch (err) {
+        return { errors: { name: "Whoops, something broke :(" } };
+      }
+    }
+  );
 
 export type PreviewColor = Array<StaticColorSelectionProps>;
 type ThemeChangeHandler = (name: keyof Colors, color: string) => void;
 
 export default function ColorsPage(props: Props) {
   const colorThemes: Array<ColorTheme> = useLoaderData();
+  const actionData: ActionResults = useActionData();
+  const formErrors = actionData?.errors;
+
   const [activeColorTheme, setActiveColorTheme] = useColorThemes(colorThemes);
   const [themeName, setThemeName] = useState<string>("");
 
@@ -78,6 +133,7 @@ export default function ColorsPage(props: Props) {
           themeName={themeName}
           disableSubmitButton={hasBeenChanged}
           resetColors={resetPreviewTheme}
+          formErrors={formErrors}
         />
         <ColorGroup
           title="App"
@@ -200,6 +256,7 @@ type ThemeControlsProps = {
   themeName: string;
   disableSubmitButton: boolean;
   resetColors: () => void;
+  formErrors?: ActionFormErrors;
 };
 function ThemeControls(props: ThemeControlsProps) {
   const { activeColorTheme, onSelect, colorThemes, themeName } = props;
@@ -249,6 +306,7 @@ function ThemeControls(props: ThemeControlsProps) {
               Cancel
             </Button>
           </div>
+          <ErrorMessage>{props.formErrors?.name}</ErrorMessage>
         </div>
       ) : (
         <div className="mb-4 min-h-[44px]" />

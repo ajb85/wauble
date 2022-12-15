@@ -1,7 +1,7 @@
 import type { Turns } from "@prisma/client";
 import supabaseToken from "./cookie";
 import { supabase } from "./db.server";
-import type { RequestMeta } from "./types";
+import type { RequestMeta, StringObject } from "./types";
 import { mergeObjects } from "./utils";
 
 export const getToken = async ({ request }: RequestMeta) => {
@@ -60,6 +60,14 @@ export const returnFromLoader = (
   }
 
   meta.locals.loader = mergeObjects(meta.locals.loader, data);
+};
+
+export const getFromRequest = (meta: RequestMeta, key?: string) => {
+  if (!meta.locals) {
+    meta.locals = {};
+  }
+
+  return key ? meta.locals[key] : meta.locals;
 };
 
 export const saveToRequest = (
@@ -198,4 +206,39 @@ export function getGameStatus(processedTurns: ProcessedTurns) {
   const hasWon = processedTurns.correctPositions.every((p) => p !== null);
   const isOver = hasWon || !userStillHasTurns(processedTurns.turns);
   return { hasWon, isOver };
+}
+
+export async function getRawFormData(meta: RequestMeta) {
+  let formData = getFromRequest(meta, "formData");
+  if (!formData) {
+    formData = await meta.request.formData();
+    saveToRequest(meta, { formData });
+  }
+
+  return formData;
+}
+
+export async function getFormData(meta: RequestMeta, keys?: Array<string>) {
+  const formData = await getRawFormData(meta);
+
+  if(!keys) {
+    return formData;
+  }
+  
+  const toReturn = keys.reduce((acc: StringObject, cur: string) => {
+    const data = formData?.get(cur);
+    if (typeof data === "string") {
+      acc[cur] = data;
+    }
+    return acc;
+  }, {});
+
+  const [currentResourceValue] = meta.request.url.split("/").reverse();
+  Object.entries(meta.params).forEach(([key, value]) => {
+    if (value && value !== currentResourceValue) {
+      toReturn[key] = value;
+    }
+  });
+
+  return toReturn;
 }

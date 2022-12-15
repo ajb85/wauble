@@ -1,37 +1,15 @@
-import { createLookupForArrayObjectsByKey } from "~/utils";
 import { useCallback, useMemo } from "react";
+import { createLookupForArrayObjectsByKey } from "~/utils";
 import useLocalStorage from "./useLocalStorage";
+import type {
+  Colors,
+  ColorTheme,
+  ColorThemeBase,
+} from "~/models/colorThemes.server";
 
-export type Colors = {
-  background: string;
-  text: string;
-  errors: string;
-  correctGuessBackground: string;
-  incorrectGuessBackground: string;
-  inWordGuessBackground: string;
-  noGuessBackground: string;
-  correctGuessText: string;
-  noGuessText: string;
-  incorrectGuessText: string;
-  inWordGuessText: string;
-  submitButtonBackground: string;
-  cancelButtonBackground: string;
-  deleteButtonBackground: string;
-  submitButtonText: string;
-  cancelButtonText: string;
-  deleteButtonText: string;
-  submitButtonBorder: string;
-  deleteButtonBorder: string;
-  cancelButtonBorder: string;
-};
-
-export type ColorTheme = {
-  name: string;
-  colors: Colors;
-  preset?: boolean;
-};
-
-export function updateCSSColors(colorTheme: ColorTheme = defaultColorTheme) {
+export function updateCSSColors(
+  colorTheme: ColorTheme | ColorThemeBase = defaultColorTheme
+) {
   const root = document.documentElement;
   const { colors } = colorTheme;
 
@@ -42,7 +20,7 @@ export function updateCSSColors(colorTheme: ColorTheme = defaultColorTheme) {
   }
 }
 
-export const defaultColorTheme: ColorTheme = {
+export const defaultColorTheme: ColorThemeBase = {
   name: "default",
   colors: {
     background: "227 226 226",
