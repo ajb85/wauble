@@ -11,7 +11,7 @@ export default function ErrorMessage(props: Props) {
   }
 
   return (
-    <p className={combineClasses("color-errors", props.className)}>
+    <p className={combineClasses("text-errors", props.className)}>
       {props.children}
     </p>
   );

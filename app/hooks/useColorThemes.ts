@@ -71,9 +71,9 @@ export default function useColorTheme(
 
   const changeActiveTheme = useCallback(
     (themeName: string) => {
-      const newTheme = colorThemesLookup[themeName] ?? defaultColorTheme;
-      setLastActiveThemeName(newTheme.name);
-      updateCSSColors(newTheme);
+      const newTheme = colorThemesLookup[themeName];
+      setLastActiveThemeName(themeName);
+      newTheme && updateCSSColors(newTheme);
     },
     [colorThemesLookup]
   );

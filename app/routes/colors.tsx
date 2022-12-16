@@ -1,4 +1,10 @@
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useActionData,
+  useLoaderData,
+  useSubmit,
+} from "@remix-run/react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { hexToRGB, parseRGBString, rgbToHex, trailingDebounce } from "~/utils";
 import { ChromePicker } from "react-color";
@@ -47,7 +53,6 @@ export const action = (meta: RequestMeta) =>
         const colors = ColorThemeQueries.colorKeys.reduce(
           (acc: Colors, key) => {
             if (acc[key] && submittedColors[key]) {
-              console.log("SUBMITTED: ", submittedColors[key]);
               acc[key] = hexToRGB(submittedColors[key]);
             }
             return acc;
@@ -66,7 +71,6 @@ export const action = (meta: RequestMeta) =>
 
         return { data: upsertedTheme, errors: {} };
       } catch (err) {
-        console.log("COLOR SUBMIT ERROR: ", err);
         return { errors: { name: "Whoops, something broke :(" } };
       }
     }
@@ -76,6 +80,7 @@ export type PreviewColor = Array<StaticColorSelectionProps>;
 type ThemeChangeHandler = (name: keyof Colors, color: string) => void;
 
 export default function ColorsPage(props: Props) {
+  const submit = useSubmit();
   const colorThemes: Array<ColorTheme> = useLoaderData();
   const actionData: ActionResults = useActionData();
   const formErrors = actionData?.errors;
@@ -119,6 +124,18 @@ export default function ColorsPage(props: Props) {
     []
   );
 
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      console.log("SAVE", themeName);
+      setActiveColorTheme(themeName);
+      submit(e.target as HTMLFormElement, {
+        method: "post",
+        action: "/colors",
+      });
+    },
+    [themeName, submit]
+  );
+
   return (
     <div className="relative mx-auto w-full max-w-[450px] px-12">
       <Link to="/game" className="absolute top-3 left-3 text-4xl">
@@ -126,7 +143,7 @@ export default function ColorsPage(props: Props) {
       </Link>
       <Logo />
       <h2 className="mb-10 pt-8 text-center">Pick your game colors!</h2>
-      <Form method="post">
+      <Form method="post" onSubmit={handleSubmit}>
         <ThemeControls
           activeColorTheme={activeColorTheme}
           colorThemes={colorThemes}
@@ -281,32 +298,34 @@ function ThemeControls(props: ThemeControlsProps) {
         options={colorOptions}
       />
       {props.disableSubmitButton ? (
-        <div className="mb-4 flex items-center justify-between">
-          <input
-            type="text"
-            name="name"
-            value={themeName}
-            placeholder="Theme Name"
-            className="border-2 border-solid border-black p-2"
-            onChange={props.onNameChange}
-          />
-          <div className="flex">
-            <Button
-              className="block"
-              type="submit"
-              disabled={!themeName.length}
-              theme="submit"
-            >
-              Save
-            </Button>
-            <Button
-              className="ml-2"
-              type="button"
-              theme="cancel"
-              onClick={props.resetColors}
-            >
-              Cancel
-            </Button>
+        <div className="flex flex-col">
+          <div className="mb-4 flex items-center justify-between">
+            <input
+              type="text"
+              name="name"
+              value={themeName}
+              placeholder="Theme Name"
+              className="border-2 border-solid border-black p-2"
+              onChange={props.onNameChange}
+            />
+            <div className="ml-2 flex">
+              <Button
+                className="block"
+                type="submit"
+                disabled={!themeName.length}
+                theme="submit"
+              >
+                Save
+              </Button>
+              <Button
+                className="ml-2"
+                type="button"
+                theme="cancel"
+                onClick={props.resetColors}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
           <ErrorMessage>{props.formErrors?.name}</ErrorMessage>
         </div>

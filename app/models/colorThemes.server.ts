@@ -96,9 +96,16 @@ export async function upsertUsersColorTheme(
   colorTheme: ColorThemeBase | ColorTheme,
   user_id: string
 ) {
+  const { data: existing } = await supabase
+    .from(table)
+    .select("id")
+    .eq("name", colorTheme.name)
+    .eq("user_id", user_id)
+    .limit(1)
+    .single();
   const { data } = await supabase
     .from(table)
-    .upsert({ ...colorTheme, user_id })
+    .upsert({ ...colorTheme, user_id, id: existing?.id })
     .select(selectProperties)
     .limit(1)
     .single();
