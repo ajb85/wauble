@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { createLookupForArrayObjectsByKey } from "~/utils";
 import useLocalStorage from "./useLocalStorage";
 import type {
@@ -64,6 +64,10 @@ export default function useColorTheme(
 
   const activeColorTheme =
     colorThemesLookup[lastActiveThemeName] ?? defaultColorTheme;
+
+  useEffect(() => {
+    updateCSSColors(activeColorTheme);
+  }, [activeColorTheme]);
 
   const changeActiveTheme = useCallback(
     (themeName: string) => {

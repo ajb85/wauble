@@ -221,10 +221,14 @@ export async function getRawFormData(meta: RequestMeta) {
 export async function getFormData(meta: RequestMeta, keys?: Array<string>) {
   const formData = await getRawFormData(meta);
 
-  if(!keys) {
-    return formData;
+  if (!keys) {
+    // If no keys are provided, get all of them
+    keys = [];
+    for (const key of formData.keys()) {
+      keys.push(key);
+    }
   }
-  
+
   const toReturn = keys.reduce((acc: StringObject, cur: string) => {
     const data = formData?.get(cur);
     if (typeof data === "string") {

@@ -1,9 +1,10 @@
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { hexToRGB, parseRGBString, rgbToHex, trailingDebounce } from "~/utils";
 import { ChromePicker } from "react-color";
 import useColorThemes, { updateCSSColors } from "~/hooks/useColorThemes";
 import useBodyClick from "~/hooks/useBodyClick";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 import type { ColorChangeHandler } from "react-color";
 import type { ColorTheme, Colors } from "~/models/colorThemes.server";
@@ -14,6 +15,7 @@ import { SingleKey } from "~/components/atoms/Keyboard/Keyboard";
 import { getFormData, getFromRequest } from "~/utils.server";
 import middleware, { isAuthed } from "~/middleware";
 import * as ColorThemeQueries from "~/models/colorThemes.server";
+import { loadUserColorsTerminal } from "~/middleware/loadUserColors";
 
 type Props = {};
 type ActionFormErrors = { name?: string };
@@ -22,24 +24,20 @@ type ActionResults =
   | { data?: ColorTheme; errors: ActionFormErrors };
 
 export const loader = (meta: RequestMeta) =>
-  middleware(meta, isAuthed, async (meta: RequestMeta) => {
-    const user = getFromRequest(meta, "user");
-    return await ColorThemeQueries.getColorThemesForUser(user.id);
-  });
+  middleware(meta, isAuthed, loadUserColorsTerminal);
 
 export const action = (meta: RequestMeta) =>
   middleware(
     meta,
     isAuthed,
     async (meta: RequestMeta): Promise<ActionResults> => {
-      console.log("!!!!!MADE IT!");
       try {
-        const formData = await getFormData(meta);
+        const { name, ...submittedColors } = await getFormData(meta);
         const user = getFromRequest(meta, "user");
 
         const existingPreset =
-          await ColorThemeQueries.getPresetColorThemeByName(formData.name);
-        console.log("FD: ", formData);
+          await ColorThemeQueries.getPresetColorThemeByName(name);
+
         if (existingPreset) {
           return {
             errors: { name: "Cannot use the same name as a preset theme." },
@@ -48,8 +46,9 @@ export const action = (meta: RequestMeta) =>
 
         const colors = ColorThemeQueries.colorKeys.reduce(
           (acc: Colors, key) => {
-            if (acc[key]) {
-              acc[key] = formData[key];
+            if (acc[key] && submittedColors[key]) {
+              console.log("SUBMITTED: ", submittedColors[key]);
+              acc[key] = hexToRGB(submittedColors[key]);
             }
             return acc;
           },
@@ -57,10 +56,7 @@ export const action = (meta: RequestMeta) =>
         );
 
         const upsertedTheme = await ColorThemeQueries.upsertUsersColorTheme(
-          {
-            name: formData.name,
-            colors,
-          },
+          { name, colors },
           user.id
         );
 
@@ -81,7 +77,6 @@ type ThemeChangeHandler = (name: keyof Colors, color: string) => void;
 
 export default function ColorsPage(props: Props) {
   const colorThemes: Array<ColorTheme> = useLoaderData();
-  console.log("COLOR THEMES: ", colorThemes);
   const actionData: ActionResults = useActionData();
   const formErrors = actionData?.errors;
 
@@ -125,10 +120,13 @@ export default function ColorsPage(props: Props) {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[450px] px-12">
+    <div className="relative mx-auto w-full max-w-[450px] px-12">
+      <Link to="/game" className="absolute top-3 left-3 text-4xl">
+        <IoMdArrowRoundBack />
+      </Link>
       <Logo />
       <h2 className="mb-10 pt-8 text-center">Pick your game colors!</h2>
-      <Form>
+      <Form method="post">
         <ThemeControls
           activeColorTheme={activeColorTheme}
           colorThemes={colorThemes}

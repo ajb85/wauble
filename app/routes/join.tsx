@@ -1,10 +1,5 @@
-import {
-  ActionArgs,
-  LoaderArgs,
-  MetaFunction,
-  redirect,
-} from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { ActionArgs, MetaFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
 import * as React from "react";
 import middleware from "~/middleware";

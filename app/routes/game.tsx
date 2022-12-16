@@ -1,11 +1,13 @@
 import {
   Form,
+  Link,
   useActionData,
   useLoaderData,
   useSubmit,
 } from "@remix-run/react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Keyboard, Guesses, Logo, Button } from "~/components/atoms";
+import { MdOutlineColorLens } from "react-icons/md";
 
 import { RequestMeta } from "~/types";
 import middleware, { isAuthed } from "~/middleware";
@@ -168,8 +170,11 @@ export default function Game(props: {}) {
         ref={formRef}
         method="post"
         onSubmit={handleSubmit}
-        className="mx-auto flex h-[90vh] max-w-[400px] flex-col justify-between"
+        className="relative mx-auto flex h-[90vh] max-w-[400px] flex-col justify-between"
       >
+        <Link to="/colors" className="absolute top-3 right-3 text-4xl">
+          <MdOutlineColorLens />
+        </Link>
         <div>
           <GameOverModal isOver={isOver} hasWon={hasWon} word={word ?? ""}>
             {guessesGameBoard}

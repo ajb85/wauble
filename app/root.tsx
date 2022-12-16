@@ -1,4 +1,4 @@
-import type { LinksFunction, LoaderArgs, MetaFunction } from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import { bodyClickListener } from "./utils";
 
 import {
@@ -8,12 +8,17 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
 import { useEffect } from "react";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 import globalStyles from "./styles/global.css";
-import { updateCSSColors } from "./hooks/useColorThemes";
+import useColorThemes, { updateCSSColors } from "./hooks/useColorThemes";
+import type { RequestMeta } from "./types";
+import middleware from "./middleware";
+import { loadUserColorsTerminal } from "./middleware/loadUserColors";
+import type { ColorTheme } from "./models/colorThemes.server";
 
 export const links: LinksFunction = () => {
   return [
@@ -32,12 +37,12 @@ export const meta: MetaFunction = () => ({
   viewport: "width=device-width,initial-scale=1",
 });
 
-export async function loader({ request }: LoaderArgs) {
-  return null;
-}
+export const loader = (meta: RequestMeta) =>
+  middleware(meta, loadUserColorsTerminal);
 
 export default function App() {
-  useEffect(updateCSSColors, []);
+  const colorThemes: Array<ColorTheme> = useLoaderData();
+  useColorThemes(colorThemes);
   return (
     <html lang="en" className="h-full">
       <head>

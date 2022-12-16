@@ -49,7 +49,7 @@ export const colorKeys: Array<keyof Colors> = [
 export const getNewColor = (): Colors => {
   // @ts-ignore - Typescript sucks at seeing an object being built and gets mad not all properties are there immediately
   return colorKeys.reduce((acc: Colors, cur) => {
-    acc[cur] = "#000";
+    acc[cur] = "0 0 0";
     return acc;
   }, {});
 };
@@ -76,9 +76,14 @@ export async function getPresetColorThemes(): Promise<Array<ColorTheme>> {
 }
 
 export async function getColorThemesForUser(
-  user_id: string
+  user_id?: string
 ): Promise<Array<ColorTheme>> {
   const presetColorThemes = await getPresetColorThemes();
+
+  if (!user_id) {
+    return presetColorThemes;
+  }
+
   const { data: userColorThemes } = await supabase
     .from(table)
     .select(selectProperties)
