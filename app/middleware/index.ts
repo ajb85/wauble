@@ -1,32 +1,32 @@
-import { getFromLoader, returnFromLoader } from "~/utils.server";
 import type { RequestMeta, StringObject, AnyObject } from "../types";
 
 export default async function middleware(
   meta: RequestMeta,
   ...middlewares: Array<Middleware>
 ) {
-  const results = await runMiddlewareWithContext(meta)(middlewares);
-  return results || getFromLoader(meta) || {};
+  const results = await runMiddlewares(middlewares, meta);
+  return results;
 }
 
-function runMiddlewareWithContext(meta: RequestMeta) {
-  async function runMiddleware(
-    middlewares: Array<Middleware>,
-    index: number = 0
-  ): Promise<MiddlewareResponse> {
-    let runNext = false;
-    const next = () => (runNext = true);
-    const error = await middlewares[index]?.(meta, next);
-    if (error === null || (error && error.status)) {
-      return error;
-    } else if (error !== undefined) {
-      returnFromLoader(meta, error);
-    } else if (runNext) {
-      return runMiddleware(middlewares, index + 1);
+async function runMiddlewares(
+  middlewares: Array<Middleware>,
+  meta: RequestMeta
+) {
+  let runNext = false;
+  const next: Next = () => (runNext = true);
+  const runMiddlewaresIndex = (currentIndex: number) => {
+    runNext = false;
+    return middlewares[currentIndex]?.(meta, next);
+  };
+
+  for (let i = 0; i < middlewares.length; i++) {
+    const results = await runMiddlewaresIndex(i);
+    if (results !== undefined || runNext === false) {
+      return results ?? null;
     }
   }
 
-  return runMiddleware;
+  return null;
 }
 
 export type Response = globalThis.Response;

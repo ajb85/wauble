@@ -53,7 +53,7 @@ export default function useColorTheme(
   allThemes: Array<ColorTheme>
 ): [ColorTheme, (s: string) => void] {
   const colorThemesLookup = useMemo(
-    () => createColorThemeLookup(allThemes),
+    () => createColorThemeLookup(allThemes ?? []),
     [allThemes]
   );
 

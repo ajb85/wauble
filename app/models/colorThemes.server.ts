@@ -1,8 +1,4 @@
 import { supabase } from "~/db.server";
-import type { StringObject } from "~/types";
-
-const table = "ColorThemes";
-const selectProperties = "id, name, colors";
 
 export type Colors = {
   background: string;
@@ -68,12 +64,15 @@ export interface ColorTheme extends ColorThemeBase {
   id: string;
 }
 
+const table = "ColorThemes";
+const selectProperties = "id, name, colors";
 export async function getPresetColorThemes(): Promise<Array<ColorTheme>> {
-  const { data: colors } = await supabase
+  const res = await supabase
     .from(table)
     .select(selectProperties)
-    .eq("user_id", null);
-  return colors?.map((c) => ({ ...c, preset: true })) || [];
+    .is("user_id", null);
+
+  return res.data?.map((c) => ({ ...c, preset: true })) || [];
 }
 
 export async function getColorThemesForUser(

@@ -124,14 +124,15 @@ export function rgbToHex(rgb: string) {
 }
 
 export function createLookupForArrayObjectsByKey(key: string) {
-  return (arr: Array<AnyObject>) =>
-    arr.reduce((acc, cur) => {
+  return (arr: Array<AnyObject>) => {
+    return arr.reduce((acc, cur) => {
       if (cur[key]) {
         acc[cur[key]] = cur;
       }
 
       return acc;
     }, {});
+  };
 }
 
 export function stopProp(e: React.MouseEvent) {
@@ -224,5 +225,6 @@ export function trailingDebounce(cb: DebounceCallback, config: DebounceConfig) {
 }
 
 export const classNames = {
-  absoluteCentered: "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-}
+  absoluteCentered:
+    "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+};

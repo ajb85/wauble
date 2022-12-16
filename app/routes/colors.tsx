@@ -32,12 +32,14 @@ export const action = (meta: RequestMeta) =>
     meta,
     isAuthed,
     async (meta: RequestMeta): Promise<ActionResults> => {
+      console.log("!!!!!MADE IT!");
       try {
         const formData = await getFormData(meta);
         const user = getFromRequest(meta, "user");
 
         const existingPreset =
           await ColorThemeQueries.getPresetColorThemeByName(formData.name);
+        console.log("FD: ", formData);
         if (existingPreset) {
           return {
             errors: { name: "Cannot use the same name as a preset theme." },
@@ -68,6 +70,7 @@ export const action = (meta: RequestMeta) =>
 
         return { data: upsertedTheme, errors: {} };
       } catch (err) {
+        console.log("COLOR SUBMIT ERROR: ", err);
         return { errors: { name: "Whoops, something broke :(" } };
       }
     }
@@ -78,6 +81,7 @@ type ThemeChangeHandler = (name: keyof Colors, color: string) => void;
 
 export default function ColorsPage(props: Props) {
   const colorThemes: Array<ColorTheme> = useLoaderData();
+  console.log("COLOR THEMES: ", colorThemes);
   const actionData: ActionResults = useActionData();
   const formErrors = actionData?.errors;
 
