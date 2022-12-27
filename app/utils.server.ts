@@ -145,11 +145,13 @@ export function processTurns(turns: Array<Turns>, w: string) {
               acc.correctPositions[letterIndex]?.toUpperCase() ===
               letter.toUpperCase();
             const isInWord = !isCorrect && isLetterInWord[turnIndex](letter);
-            acc.guesses[letter] = isCorrect
-              ? "correct"
-              : isInWord
-              ? "inWord"
-              : "wrong";
+            if (acc.guesses[letter] !== "inWord") {
+              acc.guesses[letter] = isCorrect
+                ? "correct"
+                : isInWord
+                ? "inWord"
+                : "wrong";
+            }
 
             return {
               letter,
