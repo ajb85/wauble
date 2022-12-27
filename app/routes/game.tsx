@@ -6,7 +6,13 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Keyboard, Guesses, Logo, Button } from "~/components/atoms";
+import {
+  Keyboard,
+  Guesses,
+  Logo,
+  Button,
+  ErrorMessage,
+} from "~/components/atoms";
 import { MdOutlineColorLens } from "react-icons/md";
 
 import { RequestMeta } from "~/types";
@@ -189,7 +195,9 @@ export default function Game(props: {}) {
           {guessesGameBoard}
         </div>
         <div className="pb-4">
-          {error && <p className="text-center text-rose-600">{error}</p>}
+          {error && (
+            <ErrorMessage className="text-center">{error}</ErrorMessage>
+          )}
           <div className="mt-2">
             <Keyboard
               turns={processedTurns}
